@@ -1,6 +1,6 @@
 // The instrument panel: speed, altitude, heading, throttle, fuel, hull, the minimap and the brief.
 
-import { ISLANDS, AIRSTRIPS, groundAt } from '../terrain/heightfield.js';
+import { ISLANDS, AIRSTRIPS } from '../terrain/heightfield.js';
 
 const SPEED_ALARM = 40;
 const RADAR_RANGE = 2600;
@@ -150,5 +150,3 @@ function headingFromQuaternion(q) {
   const degrees = (Math.atan2(fx, -fz) * 180) / Math.PI;
   return (degrees + 360) % 360;
 }
-
-export { groundAt };

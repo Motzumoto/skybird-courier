@@ -133,9 +133,8 @@ export const SHOTS = {
   },
 };
 
-// The gate lowest over the water: the one that frames sea behind the wing on the caldera run.
-// The gate lowest over the water AND off the sun's bearing, so the sun sits out at the edge
-// of the frame instead of clipping into it: the one that frames sea behind the wing.
+// The gate lowest over the water and off the sun's bearing, so sea fills the frame behind the
+// wing and the sun sits at the edge of it instead of clipping through the lens.
 const SUN_BEARING = Math.atan2(1.92, -1.52);
 
 function pickLowGate(course, from) {
