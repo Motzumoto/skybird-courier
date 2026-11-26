@@ -51,7 +51,10 @@ let mission = null;
 let hud = null;
 let state = 'title';
 let elapsed = 0;
-let chosen = MISSION_KINDS[Math.floor(Math.random() * MISSION_KINDS.length)];
+// ?mission=drop pins a sortie, which the tooling uses to fly one specific brief.
+const PINNED = new URLSearchParams(location.search).get('mission');
+const pickKind = () => (MISSION_KINDS.includes(PINNED) ? PINNED : MISSION_KINDS[Math.floor(Math.random() * MISSION_KINDS.length)]);
+let chosen = pickKind();
 let ringCountdown = 0;
 let lastHudPaint = 0;
 let shotSmoke = false;
@@ -87,9 +90,14 @@ function mount(kind, pose) {
   elapsed = 0;
 }
 
+// Gates plus whatever else the brief asks for: the counter is the day's work, not just the rings.
+const objectivesDone = () => (mission?.drops ?? []).filter((drop) => drop.done).length;
+const objectiveCount = () => course.passed + objectivesDone();
+const objectiveTotal = () => course.gates.length + (mission?.drops?.length ?? 0);
+
 function begin() {
   audio.start();
-  chosen = MISSION_KINDS[Math.floor(Math.random() * MISSION_KINDS.length)];
+  chosen = pickKind();
   screens.hideAll();
   const hudEl = document.getElementById('hud');
   hudEl.classList.add('shot-hud');
@@ -145,7 +153,7 @@ function rules(dt) {
   const surveyDone = mission.zones.every((zone) => zone.done);
   if (course.index >= course.gates.length) {
     if (mission.needsLanding()) {
-      hud.text.textContent = `All passes flown. Put down on ${mission.brief.finish} strip, wing low, gear down.`;
+      hud.brief(`All passes flown. Put down on ${mission.brief.finish} strip, wing low, gear down.`);
       if (checkLanding()) {
         audio.thud(0.7);
         return endSortie(true, 'Landed');
@@ -159,7 +167,7 @@ function rules(dt) {
       const island = ISLANDS[zone.island];
       const distance = Math.hypot(plane.position.x - island.x, plane.position.z - island.z);
       if (!zone.done && distance < zone.radius && !zone.inside) {
-        hud.text.textContent = 'Climb below ninety metres and hold the pass over the rim.';
+        hud.brief('Climb below ninety metres and hold the pass over the rim.');
       }
     }
   }
@@ -168,7 +176,7 @@ function rules(dt) {
   if (drop) {
     const island = ISLANDS[drop.island];
     const distance = Math.hypot(plane.position.x - island.x, plane.position.z - island.z);
-    if (distance < drop.radius * 1.5) hud.text.textContent = 'Over the village: slow under 120 kt, low, then G to release.';
+    if (distance < drop.radius * 1.5) hud.brief('Over the village: slow under 120 kt, low, then G to release.');
   }
 
   const flakDamage = threat.update(dt, plane, mission.kind === 'survey' && course.index > 1);
@@ -218,7 +226,7 @@ function frame() {
     if (state === 'flying') rules(dt);
     if (hud && time - lastHudPaint > 0.06) {
       lastHudPaint = time;
-      hud.refresh(plane, course, course.passed, course.gates.length);
+      hud.refresh(plane, course, objectiveCount(), objectiveTotal());
     }
   } else if (state === 'title') {
     const orbit = time * 0.06;
@@ -238,7 +246,7 @@ function frame() {
     plane.mesh.visible = rig.mode !== 'cockpit';
     if (hud && time - lastHudPaint > 0.06) {
       lastHudPaint = time;
-      hud.refresh(plane, course, course.passed, course.gates.length);
+      hud.refresh(plane, course, objectiveCount(), objectiveTotal());
     }
   }
 
@@ -274,11 +282,12 @@ bindInput({
   },
   drop: () => {
     if (state !== 'flying' || !mission?.drops?.length) return;
-    const result = mission.dropCrates();
+    const result = mission.dropCrates(plane);
     if (!result) return;
     if (result === 'released') {
       mission.dwell += 1;
       hud.banner('CRATES AWAY');
+      hud.brief(`The village has its crates. Finish the rings, then land at ${mission.brief.finish}.`);
     } else {
       hud.banner(result === 'too fast' ? 'TOO FAST TO DROP' : 'TOO HIGH TO DROP');
     }
@@ -342,7 +351,7 @@ if (shot) {
   for (const puff of pose.trail ?? []) damage?.place(puff.at, puff.size);
   rig.update(plane, 0.016, 0.5, true);
   state = 'shot';
-  hud.refresh(plane, course, 0, course.gates.length);
+  hud.refresh(plane, course, 0, objectiveTotal());
 } else {
   screens.showTitle();
   document.getElementById('hud').classList.add('hidden-hud');

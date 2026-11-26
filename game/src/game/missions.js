@@ -68,7 +68,7 @@ export function createMission(kind) {
     }
   };
   // A drop needs the ring taken low and slow: fast and the crates burst, high and they miss.
-  mission.dropCrates = () => {
+  mission.dropCrates = (plane) => {
     for (const drop of mission.drops) {
       if (drop.done) continue;
       const island = ISLANDS[drop.island];

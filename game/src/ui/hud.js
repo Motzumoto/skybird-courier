@@ -125,6 +125,10 @@ export function createHud(mission) {
       mapCtx.fill();
       mapCtx.restore();
     },
+    // The brief line doubles as the running hint, so main.js writes it as the sortie unfolds.
+    brief(text) {
+      el.text.textContent = text;
+    },
     banner(text) {
       el.banner.textContent = text;
       el.banner.classList.remove('show');
