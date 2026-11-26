@@ -5,6 +5,8 @@ import { WORLD } from '../config.js';
 import { groundAt, ISLANDS, AIRSTRIPS, fbm, noise } from './heightfield.js';
 
 const SAND = new THREE.Color('#d8c79a');
+const WET = new THREE.Color('#7d7158');
+const SHOAL = new THREE.Color('#12495a');
 const MOSS = new THREE.Color('#5c6f3c');
 const JUNGLE = new THREE.Color('#334c2f');
 const BASALT = new THREE.Color('#3a3733');
@@ -13,7 +15,9 @@ const EMBER = new THREE.Color('#7a4126');
 
 function groundColor(height, slope, volcanic) {
   const c = new THREE.Color();
-  if (height < 4) c.copy(SAND);
+  if (height < 0) c.copy(SHOAL).lerp(WET, Math.max(-1, height) / -1.2 + 1);
+  else if (height < 1.6) c.copy(WET);
+  else if (height < 6) c.copy(WET).lerp(SAND, (height - 1.6) / 4.4);
   else if (height < 26) c.copy(SAND).lerp(MOSS, (height - 4) / 22);
   else if (height < 200) c.copy(MOSS).lerp(JUNGLE, Math.min(1, (height - 26) / 120));
   else if (volcanic) c.copy(ASH).lerp(BASALT, Math.min(1, (height - 200) / 260));
@@ -50,7 +54,7 @@ export function buildTerrain(scene) {
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   geometry.computeVertexNormals();
 
-  const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.94, metalness: 0.02, flatShading: true });
+  const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.94, metalness: 0.02 });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.receiveShadow = true;
   mesh.castShadow = false;
@@ -71,7 +75,7 @@ function buildSea() {
     roughness: 0.34,
     metalness: 0.3,
     transparent: true,
-    opacity: 0.93,
+    opacity: 0.97,
   });
   const sea = new THREE.Mesh(geo, material);
   sea.position.y = 0.4;

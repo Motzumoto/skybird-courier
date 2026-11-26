@@ -2,6 +2,7 @@
 
 import * as THREE from 'three';
 import { WORLD, CAMERA } from '../config.js';
+import { ISLANDS } from '../terrain/heightfield.js';
 
 export function createRenderer(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: true });
@@ -88,6 +89,8 @@ function sunSprite(inner, outer, size) {
   return sprite;
 }
 
+const VOLCANO = ISLANDS.find((island) => island.volcano) ?? { x: 0, z: 0 };
+
 export function buildSky(scene) {
   scene.add(skyDome());
 
@@ -116,6 +119,39 @@ export function buildSky(scene) {
   glow.position.copy(disc.position).multiplyScalar(0.998);
   scene.add(glow);
 
+  // Sun glitter: a long additive streak on the water, running from the middle of the
+  // archipelago out under the sun, so the sea carries a path of light instead of a flat tint.
+  const glitterCanvas = document.createElement('canvas');
+  glitterCanvas.width = 128;
+  glitterCanvas.height = 1024;
+  const gctx = glitterCanvas.getContext('2d');
+  const across = gctx.createLinearGradient(0, 0, 128, 0);
+  across.addColorStop(0, 'rgba(255,236,200,0)');
+  across.addColorStop(0.5, 'rgba(255,243,214,0.85)');
+  across.addColorStop(1, 'rgba(255,236,200,0)');
+  const along = gctx.createLinearGradient(0, 0, 0, 1024);
+  gctx.fillStyle = across;
+  gctx.fillRect(0, 0, 128, 1024);
+  gctx.globalCompositeOperation = 'destination-in';
+  along.addColorStop(0, 'rgba(0,0,0,0)');
+  along.addColorStop(0.16, 'rgba(0,0,0,0.55)');
+  along.addColorStop(0.55, 'rgba(0,0,0,0.95)');
+  along.addColorStop(0.86, 'rgba(0,0,0,0.5)');
+  along.addColorStop(1, 'rgba(0,0,0,0)');
+  gctx.fillStyle = along;
+  gctx.fillRect(0, 0, 128, 1024);
+  const glitterTex = new THREE.CanvasTexture(glitterCanvas);
+  glitterTex.colorSpace = THREE.SRGBColorSpace;
+  const glitter = new THREE.Mesh(
+    new THREE.PlaneGeometry(430, 9600),
+    new THREE.MeshBasicMaterial({ map: glitterTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.42, fog: true })
+  );
+  const azimuth = Math.atan2(sun.position.x, sun.position.z);
+  glitter.rotation.set(-Math.PI / 2, 0, 0);
+  glitter.rotation.z = -azimuth;
+  glitter.position.set(Math.sin(azimuth) * 3200, 1.4, Math.cos(azimuth) * 3200);
+  scene.add(glitter);
+
   const tex = cloudTexture();
   const cloudMaterial = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.4, depthWrite: false, blending: THREE.NormalBlending });
   const clouds = new THREE.Group();
@@ -128,6 +164,19 @@ export function buildSky(scene) {
     clouds.add(sprite);
   }
   scene.add(clouds);
+
+  // A bank of cumulus stacked against the volcano, where the survey leg goes.
+  const bankMaterial = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.NormalBlending });
+  const bank = new THREE.Group();
+  for (let i = 0; i < 16; i++) {
+    const sprite = new THREE.Sprite(bankMaterial.clone());
+    const scale = 220 + Math.random() * 260;
+    sprite.scale.set(scale, scale * 0.3, 1);
+    sprite.position.set(VOLCANO.x + (Math.random() - 0.5) * 1700, 520 + Math.random() * 420, VOLCANO.z + (Math.random() - 0.5) * 1700);
+    sprite.material.opacity = 0.12 + Math.random() * 0.16;
+    bank.add(sprite);
+  }
+  scene.add(bank);
 
   scene.fog = new THREE.Fog('#c6c2ad', WORLD.fogNear, WORLD.fogFar);
   scene.background = new THREE.Color('#8fb2c4');

@@ -1,15 +1,54 @@
 // Ridge flak: puff bursts bloom ahead of the nose over the volcano and cost hull if they land close.
+// Puffs are soft billboards, so a burst reads as smoke rather than as a grey ball.
 
 import * as THREE from 'three';
-import { PLAY } from '../config.js';
 import { groundAt } from '../terrain/heightfield.js';
 
-const PUFF_MAT = new THREE.MeshStandardMaterial({ color: '#7b7369', emissive: '#2d2822', emissiveIntensity: 0.6, roughness: 1, transparent: true, opacity: 0.9 });
-const PUFF_GEO = new THREE.SphereGeometry(1, 8, 6);
+function smokeTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  const gradient = ctx.createRadialGradient(64, 64, 6, 64, 64, 62);
+  gradient.addColorStop(0, 'rgba(122,114,104,0.95)');
+  gradient.addColorStop(0.45, 'rgba(112,104,95,0.62)');
+  gradient.addColorStop(1, 'rgba(96,90,82,0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 128, 128);
+  // A few lobes so each puff is ragged, not a clean disc.
+  for (let i = 0; i < 7; i++) {
+    const x = 30 + Math.random() * 68;
+    const y = 30 + Math.random() * 68;
+    const r = 12 + Math.random() * 22;
+    const lobe = ctx.createRadialGradient(x, y, 2, x, y, r);
+    lobe.addColorStop(0, 'rgba(126,118,108,0.5)');
+    lobe.addColorStop(1, 'rgba(110,102,93,0)');
+    ctx.fillStyle = lobe;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
 
 export function createThreat(scene) {
   const puffs = [];
+  const texture = smokeTexture();
   let timer = 0;
+
+  function spawn(position, scale) {
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, opacity: 0.85 }));
+    sprite.position.copy(position);
+    sprite.scale.setScalar(scale * 2.6);
+    // A tighter, brighter core so the burst has a dense heart instead of reading as a smudge.
+    const core = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, opacity: 0.9, color: '#e8e2d6' }));
+    core.position.copy(position);
+    core.scale.setScalar(scale * 1.15);
+    scene.add(sprite, core);
+    puffs.push({ sprite, core, life: 0, scale });
+  }
 
   return {
     puffs,
@@ -18,13 +57,16 @@ export function createThreat(scene) {
       for (let i = puffs.length - 1; i >= 0; i--) {
         const puff = puffs[i];
         puff.life += dt;
-        puff.scale += dt * 26;
-        puff.mesh.scale.setScalar(puff.scale);
-        puff.mesh.position.y += dt * 3.4;
-        puff.mesh.material.opacity = Math.max(0, 0.85 - puff.life * 0.42);
+        puff.scale += dt * 24;
+        puff.sprite.scale.setScalar(puff.scale * 2.6);
+        puff.core.scale.setScalar(puff.scale * 1.15);
+        puff.sprite.position.y += dt * 3.4;
+        puff.sprite.material.opacity = Math.max(0, 0.85 - puff.life * 0.4);
+        puff.core.material.opacity = Math.max(0, 0.9 - puff.life * 0.44);
         if (puff.life > 2.4) {
-          scene.remove(puff.mesh);
-          puff.mesh.material.dispose();
+          scene.remove(puff.sprite, puff.core);
+          puff.sprite.material.dispose();
+          puff.core.material.dispose();
           puffs.splice(i, 1);
         }
       }
@@ -38,11 +80,13 @@ export function createThreat(scene) {
       const ahead = plane.position.clone().addScaledVector(forward, 260 + Math.random() * 220);
       ahead.y = Math.max(groundAt(ahead.x, ahead.z) + 30, ahead.y + (Math.random() - 0.5) * 120);
 
-      const mesh = new THREE.Mesh(PUFF_GEO, PUFF_MAT.clone());
-      mesh.position.copy(ahead);
-      scene.add(mesh);
-      const puff = { mesh, life: 0, scale: 3 };
-      puffs.push(puff);
+      for (let i = 0; i < 3; i++) {
+        const lobe = ahead.clone();
+        lobe.x += (Math.random() - 0.5) * 40;
+        lobe.y += (Math.random() - 0.5) * 26;
+        lobe.z += (Math.random() - 0.5) * 40;
+        spawn(lobe, 5 + Math.random() * 5);
+      }
 
       const distance = ahead.distanceTo(plane.position);
       if (distance < 46) return 6;
@@ -50,14 +94,10 @@ export function createThreat(scene) {
     },
     // Drop one burst at a world point (used by the screenshot poses).
     place(position, scale = 3) {
-      const mesh = new THREE.Mesh(PUFF_GEO, PUFF_MAT.clone());
-      mesh.position.copy(position);
-      mesh.scale.setScalar(scale);
-      scene.add(mesh);
-      puffs.push({ mesh, life: 0, scale });
+      spawn(position, scale);
     },
     reset() {
-      for (const puff of puffs) scene.remove(puff.mesh);
+      for (const puff of puffs) scene.remove(puff.sprite, puff.core);
       puffs.length = 0;
     },
   };

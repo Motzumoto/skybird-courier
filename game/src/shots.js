@@ -69,7 +69,13 @@ export const SHOTS = {
       const side = i % 2 === 0 ? 1 : -1;
       near.x += side * (170 + i * 40);
       near.y += 46 + (i % 4) * 46;
-      bursts.push({ at: near, size: 10 + (i % 3) * 4 });
+      for (let c = 0; c < 3; c++) {
+        const cluster = near.clone();
+        cluster.x += (c - 1) * 26 + (i % 2 ? 9 : -9);
+        cluster.y += (c % 2) * 14;
+        cluster.z += (c - 1) * 12;
+        bursts.push({ at: cluster, size: 7 + (c + i) % 3 * 3 });
+      }
     }
     const trail = [];
     for (let i = 0; i < 7; i++) {
