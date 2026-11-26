@@ -5,8 +5,8 @@
 import { ISLANDS, AIRSTRIPS } from '../terrain/heightfield.js';
 
 // A brief, in full, in one place. Each entry says what the sortie asks for and how it is judged:
-//   count  the objectives the brief asks for, for the reader's sake: the route gates plus any
-//          zones or drops. The panel tally itself is derived by tally() so the two cannot drift.
+//   count  how many objectives the brief carries. It is filled in below from the legs, zones and
+//          drops, so the number cannot drift from the brief itself.
 //   route  legs of the course: `from` and `to` are indexes into ISLANDS, `gates` is how many
 //          rings hang on that leg, so the route reads as "out to island 4 and back".
 //   zones  low passes to hold for `dwell` seconds inside `radius` of the island.
@@ -17,7 +17,6 @@ export const BRIEFS = {
   courier: {
     name: 'Mail run',
     text: 'Carry the satchel from Porto Sana to Ilheu do Sino. Take every gate on the way, then land under the lamp.',
-    count: 7,
     route: [
       { from: 0, to: 4, gates: 3 },
       { from: 4, to: 0, gates: 4 },
@@ -27,7 +26,6 @@ export const BRIEFS = {
   survey: {
     name: 'Caldera survey',
     text: 'Photograph the rim of Caldeira Preta below 90 m for six seconds a pass, then come home to Porto Sana.',
-    count: 2,
     route: [{ from: 0, to: 2, gates: 4 }],
     zones: [{ island: 2, radius: 300, dwell: 6 }],
     finish: 'Porto Sana',
@@ -35,7 +33,6 @@ export const BRIEFS = {
   drop: {
     name: 'Supply drop',
     text: 'The hamlets on Vela Rock are cut off. Cross the ring low and slow over the village, drop the crates, then land at Porto Sana.',
-    count: 5,
     route: [{ from: 0, to: 3, gates: 3 }, { from: 3, to: 0, gates: 2 }],
     drop: { island: 3, radius: 240, slow: 62, low: 150 },
     finish: 'Porto Sana',
@@ -43,11 +40,17 @@ export const BRIEFS = {
   medevac: {
     name: 'Medevac',
     text: 'A climber is down on Serra Alta. Get there, fly the gate on the ridge, and put down on Ilheu do Sino strip without bending the floats.',
-    count: 4,
     route: [{ from: 0, to: 5, gates: 2 }, { from: 5, to: 4, gates: 2 }],
     finish: 'Ilheu do Sino',
   },
 };
+
+// Every brief counts itself: route gates, plus a pass or a drop where it asks for one.
+for (const brief of Object.values(BRIEFS)) {
+  brief.count = brief.route.reduce((total, leg) => total + leg.gates, 0)
+    + (brief.zones?.length ?? 0)
+    + (brief.drop ? 1 : 0);
+}
 
 export function createMission(kind) {
   const brief = BRIEFS[kind];

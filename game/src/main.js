@@ -121,7 +121,7 @@ function endSortie(completed, headline) {
     gates: course.passed,
     seconds: elapsed,
     hull: plane.hull,
-    missions: course.gates.length,
+    missions: mission.tally(course).total,
   });
 }
 
