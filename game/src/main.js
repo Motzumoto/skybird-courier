@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { PLAY, MISSION_KINDS } from './config.js';
 import { createRenderer, buildSky, applyCameraSettings } from './render/scene.js';
-import { createCameraRig } from './render/cameras.js';
+import { createCameraRig, createFlare } from './render/cameras.js';
 import { buildCockpit } from './render/cockpit.js';
 import { buildTerrain, animateSea, airstripPad } from './terrain/buildIslands.js';
 import { buildVegetation } from './terrain/vegetation.js';
@@ -27,7 +27,7 @@ const renderer = createRenderer(canvas);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.4, 12000);
 applyCameraSettings(camera);
-buildSky(scene);
+const sky = buildSky(scene);
 const terrain = buildTerrain(scene);
 buildVegetation(scene);
 const sea = terrain.children.find((child) => child.userData?.wave);
@@ -37,6 +37,7 @@ let damage = null;
 const rig = createCameraRig(camera);
 const cockpit = buildCockpit();
 scene.add(camera);
+const flare = createFlare(camera, sky.sun.position.clone().normalize());
 camera.add(cockpit);
 cockpit.visible = false;
 const screens = createScreens();
@@ -232,6 +233,7 @@ function frame() {
     }
   }
 
+  flare.update();
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }

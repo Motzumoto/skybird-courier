@@ -62,3 +62,65 @@ export function createCameraRig(camera) {
 
   return rig;
 }
+
+// A lens breath when the sun swings into the glass: an anamorphic streak plus a couple of
+// ghost dots, all parented to the camera so they track whatever view is active.
+export function createFlare(camera, sunDirection) {
+  const group = new THREE.Group();
+  camera.add(group);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 32;
+  const ctx = canvas.getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 16, 256, 16);
+  gradient.addColorStop(0, 'rgba(255,226,178,0)');
+  gradient.addColorStop(0.5, 'rgba(255,238,204,0.9)');
+  gradient.addColorStop(1, 'rgba(255,226,178,0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 10, 256, 12);
+  const streakTexture = new THREE.CanvasTexture(canvas);
+  streakTexture.colorSpace = THREE.SRGBColorSpace;
+
+  const streak = new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({ map: streakTexture, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending, opacity: 0 })
+  );
+  streak.scale.set(3.0, 0.04, 1);
+  streak.position.z = -2;
+  group.add(streak);
+
+  const ghosts = [];
+  for (let i = 0; i < 0; i++) {
+    const ghost = new THREE.Mesh(
+      new THREE.CircleGeometry(0.06 + i * 0.03, 18),
+      new THREE.MeshBasicMaterial({ color: '#ffd9a8', transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending, opacity: 0 })
+    );
+    ghost.position.z = -2;
+    group.add(ghost);
+    ghosts.push(ghost);
+  }
+
+  const forward = new THREE.Vector3();
+  const projected = new THREE.Vector3();
+
+  return {
+    update() {
+      forward.set(0, 0, -1).applyQuaternion(camera.quaternion);
+      const align = forward.dot(sunDirection);
+      const strength = THREE.MathUtils.clamp((align - 0.55) / 0.45, 0, 1);
+      projected.copy(sunDirection).multiplyScalar(600).add(camera.position);
+      projected.project(camera);
+      const x = THREE.MathUtils.clamp(projected.x * 1.25, -1.6, 1.6);
+      const y = THREE.MathUtils.clamp(projected.y * 1.05, -1.2, 1.2);
+      streak.position.x = x * 1.05;
+      streak.position.y = y * 0.62 + 0.12;
+      streak.material.opacity = strength * 0.22;
+      ghosts.forEach((ghost, i) => {
+        ghost.position.x = -x * (0.9 + i * 0.5);
+        ghost.position.y = -y * (0.55 + i * 0.3);
+        ghost.material.opacity = strength * (0.16 - i * 0.04);
+      });
+    },
+  };
+}

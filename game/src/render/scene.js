@@ -23,7 +23,8 @@ function skyDome() {
     uniforms: {
       top: { value: new THREE.Color('#1e5c86') },
       mid: { value: new THREE.Color('#8fb2c4') },
-      low: { value: new THREE.Color('#ffd7a4') },
+      rose: { value: new THREE.Color('#c08e94') },
+      low: { value: new THREE.Color('#e6c9a6') },
     },
     vertexShader: `
       varying float vH;
@@ -32,12 +33,15 @@ function skyDome() {
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }`,
     fragmentShader: `
-      uniform vec3 top; uniform vec3 mid; uniform vec3 low;
+      uniform vec3 top; uniform vec3 mid; uniform vec3 low; uniform vec3 rose;
       varying float vH;
       void main() {
         float h = clamp(vH, -1.0, 1.0);
-        vec3 c = mix(low, mid, smoothstep(-0.06, 0.34, h));
-        c = mix(c, top, smoothstep(0.24, 0.92, h));
+        // Warm haze hugging the water, then a long slow climb into blue: no hard band.
+        vec3 c = mix(low, rose, smoothstep(0.015, 0.26, h));
+        c = mix(c, mid, smoothstep(0.16, 0.62, h));
+        c = mix(c, top, smoothstep(0.5, 1.0, h));
+        c += vec3(0.06, 0.035, 0.0) * (1.0 - smoothstep(-0.04, 0.2, h));
         gl_FragColor = vec4(c, 1.0);
       }`,
   });
@@ -63,10 +67,15 @@ function cloudTexture() {
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
   }
-  // Soften the sprite's own square edge.
-  const edge = ctx.createRadialGradient(128, 64, 40, 128, 64, 152);
-  edge.addColorStop(0, 'rgba(255,250,244,0)');
-  edge.addColorStop(1, 'rgba(255,250,244,0)');
+  // Soften the sprite's own square edge: keep the middle, fade the border away.
+  const edge = ctx.createRadialGradient(128, 64, 22, 128, 64, 128);
+  edge.addColorStop(0, 'rgba(0,0,0,0.95)');
+  edge.addColorStop(0.6, 'rgba(0,0,0,0.72)');
+  edge.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.globalCompositeOperation = 'destination-in';
+  ctx.fillStyle = edge;
+  ctx.fillRect(0, 0, 256, 128);
+  ctx.globalCompositeOperation = 'source-over';
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
@@ -178,7 +187,7 @@ export function buildSky(scene) {
   }
   scene.add(bank);
 
-  scene.fog = new THREE.Fog('#c6c2ad', WORLD.fogNear, WORLD.fogFar);
+  scene.fog = new THREE.Fog('#e6c9a6', WORLD.fogNear * 0.62, WORLD.fogFar * 0.78);
   scene.background = new THREE.Color('#8fb2c4');
   return { sun, clouds };
 }
