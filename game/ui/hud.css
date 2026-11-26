@@ -337,6 +337,7 @@ html, body {
     radial-gradient(circle at 50% 42%, rgba(255, 198, 112, 0.1), transparent 48%),
     rgba(4, 10, 13, 0.94);
 }
+#result .kicker,
 #pause .kicker {
   margin: 0;
   font-size: 11px;

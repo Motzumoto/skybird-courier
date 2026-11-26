@@ -125,6 +125,7 @@ function endSortie(completed, headline) {
     seconds: elapsed,
     hull: plane.hull,
     missions: mission.tally(course).total,
+    kind: `${mission.brief.name} · sortie ${book.sorties}`,
   });
 }
 

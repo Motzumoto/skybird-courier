@@ -22,7 +22,8 @@ export function createScreens() {
       pause.classList.toggle('hidden', !show);
       document.getElementById('hud').classList.toggle('hidden-hud', show);
     },
-    report({ completed, headline, detail, gates, seconds, hull, missions }) {
+    report({ completed, headline, detail, gates, seconds, hull, missions, kind }) {
+      document.getElementById('r-kind').textContent = kind;
       document.getElementById('r-title').textContent = completed ? 'SORTIE COMPLETE' : 'SORTIE LOST';
       document.getElementById('r-text').textContent = completed ? detail : headline;
       const tally = document.getElementById('r-tally');
