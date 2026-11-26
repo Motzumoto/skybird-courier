@@ -59,6 +59,7 @@ const pickKind = () => (MISSION_KINDS.includes(PINNED) ? PINNED : MISSION_KINDS[
 let chosen = pickKind();
 let ringCountdown = 0;
 let lastHudPaint = 0;
+let lastHint = '';
 let shotSmoke = false;
 
 const spawnPose = (() => {
@@ -100,6 +101,7 @@ const objectiveTotal = () => course.gates.length + (mission?.drops?.length ?? 0)
 function begin() {
   audio.start();
   chosen = pickKind();
+  lastHint = '';
   screens.hideAll();
   const hudEl = document.getElementById('hud');
   hudEl.classList.remove('hidden-hud');
@@ -124,85 +126,72 @@ function endSortie(completed, headline) {
   });
 }
 
+// Down on the right strip, gently or otherwise: the report reads the difference.
 function checkLanding() {
-  const strip = mission.strip();
-  if (!strip) return false;
-  const dx = plane.position.x - strip.x;
-  const dz = plane.position.z - strip.z;
-  const along = dx * Math.sin(strip.heading) + dz * Math.cos(strip.heading);
-  const across = dx * Math.cos(strip.heading) - dz * Math.sin(strip.heading);
-  const onStrip = Math.abs(along) < strip.length / 2 && Math.abs(across) < strip.width;
-  if (onStrip && plane.onGround && plane.speed < 26 && plane.alive) {
-    hud.banner(plane.lastImpact < 5 ? 'GREASER — TEXTBOOK LANDING' : 'DOWN — THE FLOATS HELD');
-    return true;
-  }
-  return false;
+  const kind = mission.onFinishStrip(plane);
+  if (!kind) return false;
+  hud.banner(kind === 'greaser' ? 'GREASER — TEXTBOOK LANDING' : 'DOWN — THE FLOATS HELD');
+  return true;
 }
 
-function rules(dt) {
+// Rings, then whatever else the brief wanted. The gate chime and the panel tally follow the same call.
+function flyObjectives(dt) {
   mission.update(dt, plane);
-
   if (ringCountdown > 0) ringCountdown -= dt;
+  if (!course.check(plane)) return;
+  audio.chime();
+  hud.banner(`GATE ${course.passed}/${course.gates.length}`);
+  rig.kick(0.5);
+}
 
-  const beaten = course.check(plane);
-  if (beaten) {
-    audio.chime();
-    hud.banner(`GATE ${course.passed}/${course.gates.length}`);
-    rig.kick(0.5);
+// The brief line doubles as the running hint, so it only writes when the hint changes.
+function updateHint() {
+  const hint = mission.hint(plane);
+  if (hint && hint !== lastHint) {
+    lastHint = hint;
+    hud.brief(hint);
   }
+}
 
-  const surveyDone = mission.zones.every((zone) => zone.done);
-  if (course.index >= course.gates.length) {
-    if (mission.needsLanding()) {
-      hud.brief(`All passes flown. Put down on ${mission.brief.finish} strip, wing low, gear down.`);
-      if (checkLanding()) {
-        audio.thud(0.7);
-        return endSortie(true, 'Landed');
-      }
-    }
-  }
-
-  if (mission.zones.length) {
-    const zone = mission.zones.find((z) => !z.done);
-    if (zone) {
-      const island = ISLANDS[zone.island];
-      const distance = Math.hypot(plane.position.x - island.x, plane.position.z - island.z);
-      if (!zone.done && distance < zone.radius && !zone.inside) {
-        hud.brief('Climb below ninety metres and hold the pass over the rim.');
-      }
-    }
-  }
-
-  const drop = mission.drops?.find((entry) => !entry.done);
-  if (drop) {
-    const island = ISLANDS[drop.island];
-    const distance = Math.hypot(plane.position.x - island.x, plane.position.z - island.z);
-    if (distance < drop.radius * 1.5) hud.brief('Over the village: slow under 120 kt, low, then G to release.');
-  }
-
+function updateThreat(dt) {
   const flakDamage = threat.update(dt, plane, mission.kind === 'survey' && course.index > 1);
-  if (flakDamage > 0) {
-    damage.apply(flakDamage, 'The flak found the engine.');
-    audio.thud(0.5);
-    rig.kick(1.3);
-    hud.banner(plane.hull < 30 ? 'FLAK — ENGINE SMOKING' : 'FLAK — AIRFRAME HIT');
-  }
+  if (flakDamage <= 0) return;
+  damage.apply(flakDamage, 'The flak found the engine.');
+  audio.thud(0.5);
+  rig.kick(1.3);
+  hud.banner(plane.hull < 30 ? 'FLAK — ENGINE SMOKING' : 'FLAK — AIRFRAME HIT');
+}
 
+// Everything the gate course is there for: finish the rings, then put it down where the lamp burns.
+function flyFinish() {
+  if (course.index < course.gates.length || !mission.needsLanding()) return false;
+  hud.brief(`All passes flown. Put down on ${mission.brief.finish} strip, wing low, gear down.`);
+  if (!checkLanding()) return false;
+  audio.thud(0.7);
+  endSortie(true, 'Landed');
+  return true;
+}
+
+// The last mile: a strip call when the finish is in sight, and the crash path.
+function watchSortie() {
   if (!plane.alive) {
     rig.kick(2.2);
     audio.thud(1.4);
     endSortie(false, plane.crashReason ?? 'The airframe is lost.');
+    return;
   }
-
-  if (plane.fuel <= 0.0001 && !plane.alive) return;
-
   const strip = mission.strip();
-  if (strip && course.index >= course.gates.length) {
-    const distance = Math.hypot(plane.position.x - strip.x, plane.position.z - strip.z);
-    if (distance < 2200 && plane.position.y - plane.groundHeight < 120) {
-      hud.banner('FINAL — LAND AT THE LAMP');
-    }
-  }
+  if (!strip || course.index < course.gates.length) return;
+  const distance = Math.hypot(plane.position.x - strip.x, plane.position.z - strip.z);
+  if (distance < 2200 && plane.position.y - plane.groundHeight < 120) hud.banner('FINAL — LAND AT THE LAMP');
+}
+
+function rules(dt) {
+  flyObjectives(dt);
+  updateHint();
+  flyFinish();
+  updateThreat(dt);
+  watchSortie();
 }
 
 const clock = new THREE.Clock();

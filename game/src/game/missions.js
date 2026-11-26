@@ -4,6 +4,14 @@
 
 import { ISLANDS, AIRSTRIPS } from '../terrain/heightfield.js';
 
+// A brief, in full, in one place. Each entry says what the sortie asks for and how it is judged:
+//   count  objectives the panel tallies: the gates in `route` plus any zones or drops.
+//   route  legs of the course: `from` and `to` are indexes into ISLANDS, `gates` is how many
+//          rings hang on that leg, so the route reads as "out to island 4 and back".
+//   zones  low passes to hold for `dwell` seconds inside `radius` of the island.
+//   drop   a crate release: inside `radius`, under `low` metres and slower than `slow`.
+//   finish the strip the sortie has to end on.
+
 export const BRIEFS = {
   courier: {
     name: 'Mail run',
@@ -85,5 +93,32 @@ export function createMission(kind) {
   };
   mission.needsLanding = () => mission.zones.every((zone) => zone.done) && mission.drops.every((drop) => drop.done);
   mission.strip = () => AIRSTRIPS.find((strip) => strip.name === brief.finish);
+
+  // Where the wheels have to go: true when the aircraft is down, slow and on the finish strip.
+  mission.onFinishStrip = (plane) => {
+    const strip = mission.strip();
+    if (!strip) return null;
+    const dx = plane.position.x - strip.x;
+    const dz = plane.position.z - strip.z;
+    const along = dx * Math.sin(strip.heading) + dz * Math.cos(strip.heading);
+    const across = dx * Math.cos(strip.heading) - dz * Math.sin(strip.heading);
+    const onStrip = Math.abs(along) < strip.length / 2 && Math.abs(across) < strip.width;
+    if (!onStrip || !plane.onGround || plane.speed >= 26 || !plane.alive) return null;
+    return plane.lastImpact < 5 ? 'greaser' : 'down';
+  };
+
+  // The running hint for whatever the sortie is waiting on, or null when nothing is close.
+  mission.hint = (plane) => {
+    const near = (island, radius) => Math.hypot(plane.position.x - island.x, plane.position.z - island.z) < radius;
+    const zone = mission.zones.find((entry) => !entry.done);
+    if (zone && near(ISLANDS[zone.island], zone.radius) && !zone.inside) {
+      return 'Climb below ninety metres and hold the pass over the rim.';
+    }
+    const drop = mission.drops.find((entry) => !entry.done);
+    if (drop && near(ISLANDS[drop.island], drop.radius * 1.5)) {
+      return 'Over the village: slow under 120 kt, low, then G to release.';
+    }
+    return null;
+  };
   return mission;
 }
