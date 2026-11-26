@@ -16,14 +16,15 @@ export function createRenderer(canvas) {
 }
 
 function skyDome() {
-  const geometry = new THREE.SphereGeometry(WORLD.size * 2.4, 32, 20);
+  // Kept inside the camera's far plane: a clipped dome leaves a flat hole in the sky.
+  const geometry = new THREE.SphereGeometry(WORLD.size * 2.05, 32, 20);
   const material = new THREE.ShaderMaterial({
     side: THREE.BackSide,
     depthWrite: false,
     uniforms: {
-      top: { value: new THREE.Color('#1e5c86') },
-      mid: { value: new THREE.Color('#8fb2c4') },
-      rose: { value: new THREE.Color('#c08e94') },
+      top: { value: new THREE.Color('#2b6b91') },
+      mid: { value: new THREE.Color('#a8a3ae') },
+      rose: { value: new THREE.Color('#cf9a94') },
       low: { value: new THREE.Color('#e6c9a6') },
     },
     vertexShader: `
@@ -39,8 +40,8 @@ function skyDome() {
         float h = clamp(vH, -1.0, 1.0);
         // Warm haze hugging the water, then a long slow climb into blue: no hard band.
         vec3 c = mix(low, rose, smoothstep(0.015, 0.26, h));
-        c = mix(c, mid, smoothstep(0.16, 0.62, h));
-        c = mix(c, top, smoothstep(0.5, 1.0, h));
+        c = mix(c, mid, smoothstep(0.1, 0.7, h));
+        c = mix(c, top, smoothstep(0.42, 0.95, h));
         c += vec3(0.06, 0.035, 0.0) * (1.0 - smoothstep(-0.04, 0.2, h));
         gl_FragColor = vec4(c, 1.0);
       }`,
@@ -155,13 +156,13 @@ export function buildSky(scene) {
   const glitterTex = new THREE.CanvasTexture(glitterCanvas);
   glitterTex.colorSpace = THREE.SRGBColorSpace;
   const glitter = new THREE.Mesh(
-    new THREE.PlaneGeometry(430, 5400),
-    new THREE.MeshBasicMaterial({ map: glitterTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.2, fog: true })
+    new THREE.PlaneGeometry(360, 3600),
+    new THREE.MeshBasicMaterial({ map: glitterTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.17, fog: true })
   );
   const azimuth = Math.atan2(sun.position.x, sun.position.z);
   glitter.rotation.set(-Math.PI / 2, 0, 0);
   glitter.rotation.z = -azimuth;
-  glitter.position.set(Math.sin(azimuth) * 2100, 1.4, Math.cos(azimuth) * 2100);
+  glitter.position.set(Math.sin(azimuth) * 1500, 1.4, Math.cos(azimuth) * 1500);
   scene.add(glitter);
 
   const tex = cloudTexture();
@@ -191,7 +192,7 @@ export function buildSky(scene) {
   scene.add(bank);
 
   scene.fog = new THREE.Fog('#cbb7a2', WORLD.fogNear * 1.7, WORLD.fogFar * 1.55);
-  scene.background = new THREE.Color('#8fb2c4');
+  scene.background = new THREE.Color('#cf9a94');
   return { sun, clouds };
 }
 

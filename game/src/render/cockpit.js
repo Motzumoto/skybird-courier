@@ -7,7 +7,7 @@ export function buildCockpit() {
   const group = new THREE.Group();
   group.position.set(0, 0, 0);
 
-  const shell = new THREE.MeshStandardMaterial({ color: '#48545b', roughness: 0.66, metalness: 0.18, side: THREE.DoubleSide, emissive: '#1d262a', emissiveIntensity: 0.85 });
+  const shell = new THREE.MeshStandardMaterial({ color: '#5b676d', roughness: 0.66, metalness: 0.16, side: THREE.DoubleSide, emissive: '#2b363b', emissiveIntensity: 1.15 });
   const trim = new THREE.MeshStandardMaterial({ color: '#151b1d', roughness: 0.55, metalness: 0.4 });
   const panelFluoro = new THREE.MeshStandardMaterial({ color: '#121a1c', emissive: '#7d4a16', emissiveIntensity: 0.42, roughness: 0.6 });
 

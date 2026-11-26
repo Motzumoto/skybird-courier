@@ -306,6 +306,7 @@ if (shot) {
     if (hide === 'clouds' && o.isSprite && mat.map && mat.blending === THREE.NormalBlending) o.visible = false;
     if (hide === 'dome' && o.isMesh && o.material.type === 'ShaderMaterial') o.visible = false;
     if (hide === 'far' && o.isSprite) o.visible = false;
+    if (hide === 'terrain' && o.isMesh && o.geometry?.attributes?.color) o.visible = false;
   });
   if (pose.gate) course.solo(pose.gate);
   if (pose.hull) plane.hull = pose.hull;
