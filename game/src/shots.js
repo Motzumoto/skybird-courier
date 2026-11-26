@@ -109,11 +109,17 @@ export const SHOTS = {
         gate = candidate;
       }
     }
-    const from = BRIDGE.midpoint.clone().addScaledVector(axis, 480).addScaledVector(across, 12);
-    from.y = BRIDGE.midpoint.y + 40;
-    const to = BRIDGE.midpoint.clone().addScaledVector(axis, -430).addScaledVector(across, -10);
-    to.y = BRIDGE.midpoint.y + 22;
-    const pose = aim(from, to, { roll: 0.07, pitch: -0.04 });
+    // Fly the line from the gate toward the span, so the ring sits dead ahead with the bridge
+    // stacked beyond it, and put the camera off the shoulder to keep the two of them apart.
+    // Only worth showing a gate if it hangs near the span; otherwise the bridge is the subject.
+    if (gate && best > 380) gate = null;
+    const anchor = gate ? gate.position : BRIDGE.midpoint;
+    const dir = (gate ? BRIDGE.midpoint.clone().sub(anchor) : axis.clone()).setY(0).normalize();
+    const pos = anchor.clone().addScaledVector(dir, gate ? -230 : -250).addScaledVector(across, 215);
+    pos.y = anchor.y + (gate ? -5 : 16);
+    const look = anchor.clone().addScaledVector(dir, gate ? 40 : 10).addScaledVector(across, 45);
+    look.y += 6;
+    const pose = aim(pos, look, { roll: 0.09, pitch: -0.03 });
     return { ...pose, speed: 84, throttle: 0.95, camera: 'chase', kind: 'courier', gate };
   },
 
