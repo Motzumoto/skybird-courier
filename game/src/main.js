@@ -53,10 +53,12 @@ let mission = null;
 let hud = null;
 let state = 'title';
 let elapsed = 0;
-// ?mission=drop pins a sortie, which the tooling uses to fly one specific brief.
+// ?mission=drop pins a sortie, which the tooling uses to fly one specific brief. Otherwise the
+// title card picks, and a replay reflies whatever is picked.
 const PINNED = new URLSearchParams(location.search).get('mission');
-const pickKind = () => (MISSION_KINDS.includes(PINNED) ? PINNED : MISSION_KINDS[Math.floor(Math.random() * MISSION_KINDS.length)]);
-let chosen = pickKind();
+let chosen = MISSION_KINDS.includes(PINNED)
+  ? PINNED
+  : MISSION_KINDS[Math.floor(Math.random() * MISSION_KINDS.length)];
 let ringCountdown = 0;
 let lastHudPaint = 0;
 let lastHint = '';
@@ -99,7 +101,6 @@ const objectiveTotal = () => mission.tally(course).total;
 
 function begin() {
   audio.start();
-  chosen = pickKind();
   lastHint = '';
   screens.hideAll();
   const hudEl = document.getElementById('hud');
