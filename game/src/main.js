@@ -360,5 +360,11 @@ if (shot) {
   document.getElementById('hud').classList.add('hidden-hud');
 }
 
-window.__game = { get scene() { return scene; }, get camera() { return camera; }, get plane() { return plane; } };
+window.__game = {
+  get scene() { return scene; },
+  get camera() { return camera; },
+  get plane() { return plane; },
+  get course() { return course; },
+  get mission() { return mission; },
+};
 frame();

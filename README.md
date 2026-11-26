@@ -73,6 +73,8 @@ The four images are not hand-placed: `game/src/shots.js` flies the game's own co
 runway and poses the camera there, and `tools/shoot.mjs` renders each pose in headless Chromium at
 1280x720, so the shots come out of the shipping code. `tools/playtest.mjs` is a headless play-through
 that flies a sortie with real key events and reports the state and any console errors.
+`?mission=<courier|survey|drop|medevac>` pins a brief for that tooling, and `window.__game` exposes the
+scene, camera, plane, course and mission so a headless run can put the aircraft where it needs it.
 
 ## Layout
 
