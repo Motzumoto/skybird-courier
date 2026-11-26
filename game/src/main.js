@@ -15,6 +15,7 @@ import { buildCourse } from './game/gates.js';
 import { createMission } from './game/missions.js';
 import { buildTraffic } from './game/traffic.js';
 import { createThreat } from './game/threat.js';
+import { createSpray } from './render/spray.js';
 import { createDamage } from './aircraft/damage.js';
 import { createHud } from './ui/hud.js';
 import { createScreens } from './ui/screens.js';
@@ -35,6 +36,7 @@ buildBridge(scene);
 const sea = terrain.children.find((child) => child.userData?.wave);
 const traffic = buildTraffic(scene);
 const threat = createThreat(scene);
+const spray = createSpray(scene);
 let damage = null;
 const rig = createCameraRig(camera);
 const cockpit = buildCockpit();
@@ -100,7 +102,6 @@ function begin() {
   chosen = pickKind();
   screens.hideAll();
   const hudEl = document.getElementById('hud');
-  hudEl.classList.add('shot-hud');
   hudEl.classList.remove('hidden-hud');
   mount(chosen);
   state = 'flying';
@@ -214,8 +215,18 @@ function frame() {
     elapsed += dt;
     audio.update(plane.throttle, plane.speed);
     plane.speedCap = damage?.power() ?? 1;
+    const wasDown = plane.onGround;
     if (state === 'flying') plane.update(dt, readInput());
     else plane.update(dt, inputIdle);
+    if (plane.onGround && !wasDown && plane.alive) {
+      const heavy = plane.lastImpact > 5;
+      const gear = plane.position.clone();
+      gear.y = plane.groundHeight + 0.3;
+      spray.burst(gear, heavy, plane.onWater);
+      rig.kick(heavy ? 1.5 : 0.7);
+      audio.thud(heavy ? 0.8 : 0.45);
+    }
+    spray.update(dt);
     rig.update(plane, dt, plane.speed / 140);
     damage?.update(dt);
     damage?.frame(dt);
@@ -259,7 +270,6 @@ function restart() {
   if (state === 'flying') return;
   screens.hideAll();
   const hudEl = document.getElementById('hud');
-  hudEl.classList.add('shot-hud');
   hudEl.classList.remove('hidden-hud');
   mount(chosen);
   state = 'flying';
@@ -333,6 +343,11 @@ if (shot) {
   plane.speed = pose.speed;
   plane.setThrottle(pose.throttle);
   rig.mode = pose.camera;
+  // A still frame wants the furniture out of the sightline: bigger and lower in the cockpit view.
+  if (pose.camera === 'cockpit') {
+    cockpit.scale.setScalar(1.2);
+    cockpit.position.y = -0.085;
+  }
   // Debug switches: ?hide=sea|clouds lets a probe isolate what a reviewer is seeing.
   const hide = new URLSearchParams(location.search).get('hide');
   if (hide) scene.traverse((o) => {
