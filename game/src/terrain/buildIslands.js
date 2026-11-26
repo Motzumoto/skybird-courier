@@ -136,6 +136,35 @@ function buildAirstrip(strip) {
     }
   }
 
+  // Threshold piano keys and the designator at each end, so the strip reads as a runway from the air.
+  const paint = new THREE.MeshStandardMaterial({ color: '#f7f1dc', emissive: '#6b6250', emissiveIntensity: 0.5, roughness: 0.8 });
+  for (const end of [-1, 1]) {
+    for (let i = 0; i < 6; i++) {
+      const key = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.24, 14), paint);
+      key.position.set(-strip.width / 2 + 4 + i * 3.6, 0.9, end * (strip.length / 2 - 10));
+      group.add(key);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f7f1dc';
+    ctx.font = 'bold 208px "DIN Alternate", Impact, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(strip.designator ?? '09', 128, 140);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const number = new THREE.Mesh(
+      new THREE.PlaneGeometry(23, 23),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true }),
+    );
+    number.rotation.x = -Math.PI / 2;
+    number.rotation.z = end > 0 ? Math.PI : 0;
+    number.position.set(0, 0.96, end * (strip.length / 2 - 26));
+    group.add(number);
+  }
+
   // PAPI bars off the threshold: two white, two red, the way a real approach reads.
   const papiWhite = new THREE.MeshStandardMaterial({ color: '#fff6dd', emissive: '#ffeec4', emissiveIntensity: 3.2 });
   const papiRed = new THREE.MeshStandardMaterial({ color: '#ff6b4a', emissive: '#ff3d20', emissiveIntensity: 3.2 });

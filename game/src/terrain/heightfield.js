@@ -64,8 +64,8 @@ export const ISLANDS = [
 
 // Airstrips sit on a levelled shelf that the heightfield itself carves, so a landing is a landing.
 export const AIRSTRIPS = [
-  { name: 'Porto Sana', x: -1450, z: 1280, heading: 0.42, length: 620, width: 44, pad: 88 },
-  { name: 'Ilheu do Sino', x: 1560, z: 1120, heading: -1.05, length: 480, width: 34, pad: 112 },
+  { name: 'Porto Sana', x: -1450, z: 1280, heading: 0.42, length: 620, width: 44, pad: 88, designator: '14' },
+  { name: 'Ilheu do Sino', x: 1560, z: 1120, heading: -1.05, length: 480, width: 34, pad: 112, designator: '27' },
 ];
 
 // The shape of one island at a point: 1 at the crown, 0 past the shore.

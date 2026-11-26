@@ -240,3 +240,11 @@ html, body {
   transform: scale(0.92);
   transform-origin: top left;
 }
+
+/* The STALL flag only shows while the wing is actually stalled. */
+.gauge.speed u {
+  opacity: 0;
+}
+.gauge.speed u.on {
+  opacity: 1;
+}

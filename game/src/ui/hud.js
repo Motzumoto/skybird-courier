@@ -9,6 +9,7 @@ export function createHud(mission) {
   const el = {
     root: document.getElementById('hud'),
     speed: document.getElementById('g-speed'),
+    speedLabel: document.querySelector('.gauge.speed u'),
     alt: document.getElementById('g-alt'),
     heading: document.getElementById('g-hdg'),
     fuel: document.getElementById('g-fuel'),
@@ -44,6 +45,7 @@ export function createHud(mission) {
 
       const speedAlarm = plane.speed < SPEED_ALARM && plane.alive;
       el.gauges[0].classList.toggle('alarm', speedAlarm);
+      el.speedLabel.classList.toggle('on', speedAlarm);
       const pullUp = plane.position.y - plane.groundHeight < 42 && plane.alive && plane.sinkRate > 2;
       el.gauges[1].classList.toggle('alarm', pullUp);
       el.gauges[2].classList.toggle('alarm', false);

@@ -59,7 +59,7 @@ export const SHOTS = {
     const from = groundAt(endA.x, endA.z) < groundAt(endB.x, endB.z) ? endA : endB;
     from.y = pad + 15;
     const to = new THREE.Vector3(strip.x, pad + 3, strip.z).lerp(from, 0.34);
-    const pose = aim(from, to, { roll: 0.04, pitch: -0.1 });
+    const pose = aim(from, to, { roll: 0.04, pitch: -0.15 });
     return { ...pose, speed: 56, throttle: 0.46, camera: 'cockpit', kind: 'medevac' };
   },
 
