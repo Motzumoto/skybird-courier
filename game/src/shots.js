@@ -54,21 +54,19 @@ export const SHOTS = {
     const pad = airstripPad(strip);
     const heading = strip.heading;
     // Approach from whichever end runs downhill to the sea, so the strip reads against water.
-    const endA = new THREE.Vector3(strip.x + Math.sin(heading) * (strip.length / 2 + 26), 0, strip.z + Math.cos(heading) * (strip.length / 2 + 26));
-    const endB = new THREE.Vector3(strip.x - Math.sin(heading) * (strip.length / 2 + 26), 0, strip.z - Math.cos(heading) * (strip.length / 2 + 26));
+    const endA = new THREE.Vector3(strip.x + Math.sin(heading) * (strip.length / 2 + 60), 0, strip.z + Math.cos(heading) * (strip.length / 2 + 60));
+    const endB = new THREE.Vector3(strip.x - Math.sin(heading) * (strip.length / 2 + 60), 0, strip.z - Math.cos(heading) * (strip.length / 2 + 60));
     const from = groundAt(endA.x, endA.z) < groundAt(endB.x, endB.z) ? endA : endB;
     // High enough on the glideslope to see the apron and pitch down over it, so the dash stays
     // along the bottom edge instead of owning the foreground.
-    // Low on the flare, not high on the final: at 19 m the strip read as a diagram, at 9 m it
-    // reads as the last few seconds of an approach.
-    from.y = pad + 9;
+    from.y = pad + 19;
     // Aim left of the centreline and hold a flare attitude, so the frame is off-axis and nose-up
     // rather than a symmetrical diagram of a runway.
-    const to = new THREE.Vector3(strip.x - Math.cos(heading) * 9, pad + 26, strip.z + Math.sin(heading) * 9).lerp(from, 0.62);
-    const pose = aim(from, to, { roll: 0.06, pitch: 0.16 });
+    const to = new THREE.Vector3(strip.x, pad + 2, strip.z).lerp(from, 0.4);
+    const pose = aim(from, to, { roll: 0.04, pitch: -0.02 });
     // No course rings in this frame: the strip is the subject, and a ring over the hill only
     // mottles the approach.
-    return { ...pose, speed: 44, throttle: 0.34, camera: 'cockpit', kind: 'medevac', rings: false };
+    return { ...pose, speed: 56, throttle: 0.46, camera: 'cockpit', kind: 'medevac', rings: false };
   },
 
   // The caldera run: low over the ash with the gate ahead and flak hanging in the air.

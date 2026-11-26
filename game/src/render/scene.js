@@ -24,8 +24,8 @@ function skyDome() {
     uniforms: {
       top: { value: new THREE.Color('#2b6b91') },
       mid: { value: new THREE.Color('#a8a3ae') },
-      rose: { value: new THREE.Color('#cf9a94') },
-      low: { value: new THREE.Color('#e6c9a6') },
+      rose: { value: new THREE.Color('#e2b2aa') },
+      low: { value: new THREE.Color('#f6e2c2') },
     },
     vertexShader: `
       varying float vH;
@@ -43,6 +43,9 @@ function skyDome() {
         c = mix(c, mid, smoothstep(0.1, 0.7, h));
         c = mix(c, top, smoothstep(0.42, 0.95, h));
         c += vec3(0.06, 0.035, 0.0) * (1.0 - smoothstep(-0.04, 0.2, h));
+        // A lift through the low haze so the horizon band stays the brightest part of the frame
+        // even when the ground in front of it is lit.
+        c += vec3(0.05, 0.044, 0.036) * (1.0 - smoothstep(0.08, 0.55, h));
         gl_FragColor = vec4(c, 1.0);
       }`,
   });

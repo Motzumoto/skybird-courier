@@ -117,12 +117,14 @@ function buildAirstrip(strip) {
   // low final, and the graded ground does the work at the edges.
   const asphalt = new THREE.Mesh(
     new THREE.PlaneGeometry(strip.width, strip.length),
-    new THREE.MeshStandardMaterial({ color: '#2c3033', roughness: 0.95 }),
+    // Mid grey with a little self-light: at golden hour a dark asphalt sheet went to near black
+  // and the strip stopped separating from the shadowed ground in front of it.
+    new THREE.MeshStandardMaterial({ color: '#878d92', roughness: 0.78, emissive: '#3a3f42', emissiveIntensity: 0.85, metalness: 0.08 }),
   );
   asphalt.rotation.x = -Math.PI / 2;
   asphalt.position.y = 0.04;
   // Gravel shoulders, so the asphalt edge is broken by a strip of grade rather than a hard line.
-  const shoulder = new THREE.MeshStandardMaterial({ color: '#6d6552', roughness: 1 });
+  const shoulder = new THREE.MeshStandardMaterial({ color: '#a49878', roughness: 1, emissive: '#3a362a', emissiveIntensity: 0.9 });
   for (const side of [-1, 1]) {
     const grade = new THREE.Mesh(new THREE.PlaneGeometry(5, strip.length), shoulder);
     grade.rotation.x = -Math.PI / 2;
@@ -148,7 +150,7 @@ function buildAirstrip(strip) {
   }
 
   // Threshold piano keys and the designator at each end, so the strip reads as a runway from the air.
-  const paint = new THREE.MeshStandardMaterial({ color: '#f7f1dc', emissive: '#6b6250', emissiveIntensity: 0.5, roughness: 0.8 });
+  const paint = new THREE.MeshStandardMaterial({ color: '#fdfaf0', emissive: '#fff4dc', emissiveIntensity: 1.15, roughness: 0.7 });
   for (const end of [-1, 1]) {
     for (let i = 0; i < 5; i++) {
       const key = new THREE.Mesh(new THREE.BoxGeometry(3, 0.24, 16), paint);
@@ -176,6 +178,18 @@ function buildAirstrip(strip) {
     number.rotation.z = end > 0 ? Math.PI : 0;
     number.position.set(0, 0.18, end * (strip.length / 2 - 38));
     group.add(number);
+  }
+
+  // A wash of warm light over each threshold: the touchdown zone should be the brightest thing
+  // on the ground, or the strip sinks into the hill it is cut into.
+  for (const end of [-1, 1]) {
+    const pool = new THREE.Mesh(
+      new THREE.PlaneGeometry(strip.width + 26, 150),
+      new THREE.MeshBasicMaterial({ color: '#ffdda6', transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false }),
+    );
+    pool.rotation.x = -Math.PI / 2;
+    pool.position.set(0, 0.07, end * (strip.length / 2 - 62));
+    group.add(pool);
   }
 
   // PAPI bars off the threshold: two white, two red, the way a real approach reads.
