@@ -29,29 +29,33 @@ export const SHOTS = {
   cover: ({ course }) => {
     const gate = course?.gates[1] ?? course?.gates[0] ?? null;
     if (!gate) return { kind: 'courier' };
-    const from = behindGate(gate, 268, 34);
-    const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, -6, 0)), { roll: -0.18, pitch: 0.03 });
+    const from = behindGate(gate, 330, 58);
+    const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 12, 0)), { roll: -0.1, pitch: 0.02 });
     return { ...pose, speed: 79, throttle: 0.83, camera: 'chase', kind: 'courier' };
   },
 
   // Final approach: the lamp, the numbers and the strip filling the windscreen.
   approach: ({ strips }) => {
-    const strip = strips?.[1];
+    const strip = strips?.[0];
     if (!strip) return { kind: 'medevac' };
     const pad = airstripPad(strip);
     const heading = strip.heading;
-    const from = new THREE.Vector3(strip.x - Math.sin(heading) * 760, pad + 62, strip.z - Math.cos(heading) * 760);
-    const to = new THREE.Vector3(strip.x, pad, strip.z);
-    const pose = aim(from, to, { roll: 0.1, pitch: -0.05 });
-    return { ...pose, speed: 56, throttle: 0.48, camera: 'chase', kind: 'medevac' };
+    // Approach from whichever end runs downhill to the sea, so the strip reads against water.
+    const endA = new THREE.Vector3(strip.x + Math.sin(heading) * (strip.length / 2 + 250), 0, strip.z + Math.cos(heading) * (strip.length / 2 + 250));
+    const endB = new THREE.Vector3(strip.x - Math.sin(heading) * (strip.length / 2 + 250), 0, strip.z - Math.cos(heading) * (strip.length / 2 + 250));
+    const from = groundAt(endA.x, endA.z) < groundAt(endB.x, endB.z) ? endA : endB;
+    from.y = pad + 26;
+    const to = new THREE.Vector3(strip.x, pad + 3, strip.z);
+    const pose = aim(from, to, { roll: 0.05, pitch: -0.03 });
+    return { ...pose, speed: 56, throttle: 0.46, camera: 'cockpit', kind: 'medevac' };
   },
 
   // The caldera run: low over the ash with the gate ahead and flak hanging in the air.
   ridge: ({ course }) => {
     const gate = pickLowGate(course, 2) ?? null;
     if (!gate) return { kind: 'survey' };
-    const from = behindGate(gate, 300, 84);
-    const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, -10, 0)), { roll: 0.2, pitch: 0.05 });
+    const from = behindGate(gate, 420, 128);
+    const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 16, 0)), { roll: 0.18, pitch: 0.03 });
     return { ...pose, speed: 84, throttle: 0.95, camera: 'chase', kind: 'survey' };
   },
 
@@ -59,7 +63,7 @@ export const SHOTS = {
   cliffs: ({ course }) => {
     const gate = course?.gates[5] ?? course?.gates[4] ?? null;
     if (!gate) return { kind: 'courier' };
-    const from = behindGate(gate, 232, 46);
+    const from = behindGate(gate, 320, 54);
     const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, -14, 0)), { roll: -0.17, pitch: 0.02 });
     return { ...pose, speed: 76, throttle: 0.72, camera: 'chase', kind: 'courier' };
   },

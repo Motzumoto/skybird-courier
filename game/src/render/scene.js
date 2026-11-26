@@ -121,7 +121,7 @@ export function buildSky(scene) {
   const clouds = new THREE.Group();
   for (let i = 0; i < 26; i++) {
     const sprite = new THREE.Sprite(cloudMaterial.clone());
-    const scale = 420 + Math.random() * 900;
+    const scale = 320 + Math.random() * 520;
     sprite.scale.set(scale, scale * 0.42, 1);
     sprite.position.set((Math.random() - 0.5) * WORLD.size * 2.4, 520 + Math.random() * 700, (Math.random() - 0.5) * WORLD.size * 2.4);
     sprite.material.opacity = 0.2 + Math.random() * 0.24;

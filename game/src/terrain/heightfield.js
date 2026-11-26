@@ -62,9 +62,10 @@ export const ISLANDS = [
   { name: 'Serra Alta', x: -1180, z: -320, r: 520, h: 430 },
 ];
 
+// Airstrips sit on a levelled shelf that the heightfield itself carves, so a landing is a landing.
 export const AIRSTRIPS = [
-  { name: 'Porto Sana', x: -1450, z: 1280, heading: 0.42, length: 620, width: 44 },
-  { name: 'Ilheu do Sino', x: 1560, z: 1120, heading: -1.05, length: 480, width: 34 },
+  { name: 'Porto Sana', x: -1450, z: 1280, heading: 0.42, length: 620, width: 44, pad: 88 },
+  { name: 'Ilheu do Sino', x: 1560, z: 1120, heading: -1.05, length: 480, width: 34, pad: 112 },
 ];
 
 // The shape of one island at a point: 1 at the crown, 0 past the shore.
@@ -90,7 +91,22 @@ export function groundAt(x, z) {
     h = Math.max(h, island.h * cone - (island.volcano ? crown * island.h * 0.42 : 0));
   }
   if (h > 2) h += (fbm(x * 0.021, z * 0.021, 3) - 0.5) * 12;
+
+  for (const strip of AIRSTRIPS) {
+    const dx = x - strip.x;
+    const dz = z - strip.z;
+    const along = dx * Math.sin(strip.heading) + dz * Math.cos(strip.heading);
+    const across = dx * Math.cos(strip.heading) - dz * Math.sin(strip.heading);
+    const reachAlong = strip.length * 0.75;
+    const reachAcross = strip.width * 2.6;
+    const grip = Math.max(0, 1 - Math.max(Math.abs(along) / reachAlong, Math.abs(across) / reachAcross));
+    if (grip > 0) h = THREE_LERP(h, strip.pad, Math.pow(grip, 0.7));
+  }
   return h;
+}
+
+function THREE_LERP(a, b, t) {
+  return a + (b - a) * Math.min(1, Math.max(0, t));
 }
 
 export function isWater(x, z) {

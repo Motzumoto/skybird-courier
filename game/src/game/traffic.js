@@ -13,12 +13,12 @@ export function buildTraffic(scene) {
     1.1, 0, 0, 0, 0.34, 0.5, 0, 0, -0.2,
   ]), 3));
   birdGeo.computeVertexNormals();
-  const birdMat = new THREE.MeshStandardMaterial({ color: '#2f2a24', roughness: 0.9, side: THREE.DoubleSide, flatShading: true });
+  const birdMat = new THREE.MeshStandardMaterial({ color: '#4a4038', roughness: 0.9, side: THREE.DoubleSide, flatShading: true, emissive: '#241d17', emissiveIntensity: 0.5 });
 
   for (let i = 0; i < PLAY.birdCount; i++) {
     const spot = randomSpot(20);
     const mesh = new THREE.Mesh(birdGeo, birdMat);
-    mesh.scale.setScalar(1.7 + Math.random() * 1.6);
+    mesh.scale.setScalar(2.8 + Math.random() * 2.4);
     mesh.position.set(spot.x, spot.h + 24 + Math.random() * 130, spot.z);
     scene.add(mesh);
     birds.push({ mesh, base: mesh.position.clone(), phase: Math.random() * Math.PI * 2, radius: 22 + Math.random() * 66, speed: 0.32 + Math.random() * 0.5 });

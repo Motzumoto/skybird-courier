@@ -95,7 +95,7 @@ export function animateSea(sea, time) {
 
 // Where a strip's tarmac actually sits, so the camera and the spawn agree with the mesh.
 export function airstripPad(strip) {
-  return Math.max(6, groundAt(strip.x, strip.z)) + 1.4;
+  return strip.pad + 1.4;
 }
 
 function buildAirstrip(strip) {
@@ -112,10 +112,10 @@ function buildAirstrip(strip) {
   asphalt.receiveShadow = true;
   group.add(asphalt);
 
-  const dash = new THREE.MeshStandardMaterial({ color: '#e8e2cf', roughness: 0.8 });
+  const dash = new THREE.MeshStandardMaterial({ color: '#f2ecd8', roughness: 0.75, emissive: '#5a5238', emissiveIntensity: 0.4 });
   const edge = new THREE.MeshStandardMaterial({ color: '#cfc39f', emissive: '#6a5c33', emissiveIntensity: 0.5 });
   for (let i = -strip.length / 2 + 26; i < strip.length / 2 - 20; i += 46) {
-    const mark = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.2, 20), dash);
+    const mark = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.22, 26), dash);
     mark.position.set(0, 0.9, i);
     group.add(mark);
   }
@@ -126,6 +126,29 @@ function buildAirstrip(strip) {
       group.add(light);
     }
   }
+
+  // PAPI bars off the threshold: two white, two red, the way a real approach reads.
+  const papiWhite = new THREE.MeshStandardMaterial({ color: '#fff6dd', emissive: '#ffeec4', emissiveIntensity: 3.2 });
+  const papiRed = new THREE.MeshStandardMaterial({ color: '#ff6b4a', emissive: '#ff3d20', emissiveIntensity: 3.2 });
+  for (let i = 0; i < 4; i++) {
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.5, 1.6), i < 2 ? papiWhite : papiRed);
+    bar.position.set(-strip.width / 2 - 12, 1.4, -strip.length / 2 + 18 + i * 6.4);
+    group.add(bar);
+  }
+  // Threshold masts: the pair of lamps a pilot aims between.
+  for (const side of [-1, 1]) {
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 6, 6), new THREE.MeshStandardMaterial({ color: '#3a474b', roughness: 0.8 }));
+    mast.position.set(side * strip.width * 0.7, 3, -strip.length / 2 + 9);
+    const lamp = new THREE.Mesh(new THREE.SphereGeometry(1.5, 10, 8), new THREE.MeshStandardMaterial({ color: '#fffbe9', emissive: '#fff2c8', emissiveIntensity: 4 }));
+    lamp.position.set(side * strip.width * 0.7, 6.4, -strip.length / 2 + 9);
+    const beam = new THREE.PointLight('#fff0c0', 90, 320, 2);
+    beam.position.copy(lamp.position);
+    group.add(mast, lamp, beam);
+  }
+
+  const threshold = new THREE.Mesh(new THREE.BoxGeometry(strip.width, 0.2, 3), new THREE.MeshStandardMaterial({ color: '#e8e2cf', emissive: '#8a805f', emissiveIntensity: 0.4 }));
+  threshold.position.set(0, 0.85, -strip.length / 2 + 12);
+  group.add(threshold);
 
   const towerBase = new THREE.Mesh(
     new THREE.CylinderGeometry(5, 6.6, 22, 10),

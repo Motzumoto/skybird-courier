@@ -39,11 +39,11 @@ html, body {
 .pit-horizon {
   position: absolute;
   left: 50%;
-  top: 43%;
-  width: 460px;
+  top: 37%;
+  width: 340px;
   height: 300px;
-  margin: -130px 0 0 -230px;
-  opacity: 0.85;
+  margin: -120px 0 0 -170px;
+  opacity: 0.55;
 }
 .pit-horizon::before, .pit-horizon::after {
   content: "";
@@ -51,14 +51,14 @@ html, body {
   background: var(--amber);
   box-shadow: 0 0 6px rgba(255, 195, 92, 0.6);
 }
-.pit-horizon::before { left: 0; top: 128px; width: 190px; height: 3px; }
-.pit-horizon::after { right: 0; top: 128px; width: 190px; height: 3px; }
+.pit-horizon::before { left: 0; top: 118px; width: 130px; height: 3px; }
+.pit-horizon::after { right: 0; top: 118px; width: 130px; height: 3px; }
 .pit-horizon span {
   position: absolute;
   left: 50%;
-  top: 121px;
-  width: 22px;
-  height: 22px;
+  top: 111px;
+  width: 18px;
+  height: 18px;
   margin-left: -11px;
   border: 2px solid var(--amber);
   border-radius: 50%;

@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { PLAY, MISSION_KINDS } from './config.js';
 import { createRenderer, buildSky, applyCameraSettings } from './render/scene.js';
 import { createCameraRig } from './render/cameras.js';
+import { buildCockpit } from './render/cockpit.js';
 import { buildTerrain, animateSea, airstripPad } from './terrain/buildIslands.js';
 import { AIRSTRIPS, ISLANDS, groundAt } from './terrain/heightfield.js';
 import { buildPlane } from './aircraft/buildPlane.js';
@@ -30,6 +31,10 @@ const sea = terrain.children.find((child) => child.userData?.wave);
 const traffic = buildTraffic(scene);
 const threat = createThreat(scene);
 const rig = createCameraRig(camera);
+const cockpit = buildCockpit();
+scene.add(camera);
+camera.add(cockpit);
+cockpit.visible = false;
 const screens = createScreens();
 const audio = createAudio();
 
@@ -180,6 +185,8 @@ function frame() {
     if (state === 'flying') plane.update(dt, readInput());
     else plane.update(dt, inputIdle);
     rig.update(plane, dt, plane.speed / 140);
+    cockpit.visible = rig.mode === 'cockpit';
+    plane.mesh.visible = rig.mode !== 'cockpit';
     traffic.update(time, dt);
     animateSea(sea, time);
     if (state === 'flying') rules(dt);
@@ -197,6 +204,8 @@ function frame() {
     traffic.update(time, dt);
     animateSea(sea, time);
     rig.update(plane, dt, 0.5, true);
+    cockpit.visible = rig.mode === 'cockpit';
+    plane.mesh.visible = rig.mode !== 'cockpit';
     if (hud && time - lastHudPaint > 0.06) {
       lastHudPaint = time;
       hud.refresh(plane, course, course.passed, course.gates.length);

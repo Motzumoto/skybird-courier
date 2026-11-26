@@ -5,8 +5,8 @@ export const WORLD = {
   seaLevel: 0,
   grid: 200,           // heightfield resolution per side
   maxHeight: 620,
-  fogNear: 900,
-  fogFar: 4600,
+  fogNear: 1500,
+  fogFar: 7200,
   sunElevation: 0.19,  // golden hour
 };
 
@@ -34,7 +34,7 @@ export const PLAY = {
   ringRadius: 46,
   ringValue: 1,
   flakRange: 900,
-  birdCount: 90,
+  birdCount: 64,
   boatCount: 14,
   lodFar: 3400,
 };
