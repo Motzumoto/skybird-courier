@@ -57,7 +57,7 @@ const spawnPose = (() => {
   const strip = AIRSTRIPS[0];
   const position = new THREE.Vector3(strip.x, airstripPad(strip) + 1.7, strip.z + 120);
   const quaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, strip.heading, 0, 'YXZ'));
-  return { position, quaternion, speed: 62 };
+  return { position, quaternion, speed: 78, throttle: 1 };
 })();
 
 function mount(kind, pose) {
@@ -88,7 +88,9 @@ function begin() {
   audio.start();
   chosen = MISSION_KINDS[Math.floor(Math.random() * MISSION_KINDS.length)];
   screens.hideAll();
-  document.getElementById('hud').classList.add('shot-hud');
+  const hudEl = document.getElementById('hud');
+  hudEl.classList.add('shot-hud');
+  hudEl.classList.remove('hidden-hud');
   mount(chosen);
   state = 'flying';
   hud.banner('CLEARED FOR THE RUN');
@@ -237,7 +239,9 @@ function frame() {
 function restart() {
   if (state === 'flying') return;
   screens.hideAll();
-  document.getElementById('hud').classList.add('shot-hud');
+  const hudEl = document.getElementById('hud');
+  hudEl.classList.add('shot-hud');
+  hudEl.classList.remove('hidden-hud');
   mount(chosen);
   state = 'flying';
 }
@@ -280,7 +284,9 @@ window.addEventListener('resize', () => {
 const shot = shotName();
 if (shot) {
   screens.hideAll();
-  document.getElementById('hud').classList.add('shot-hud');
+  const hudEl = document.getElementById('hud');
+  hudEl.classList.add('shot-hud');
+  hudEl.classList.remove('hidden-hud');
   const first = SHOTS[shot]({ course: null, strips: AIRSTRIPS });
   mount(first.kind);
   const pose = SHOTS[shot]({ course, strips: AIRSTRIPS });

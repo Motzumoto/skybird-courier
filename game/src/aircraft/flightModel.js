@@ -16,7 +16,7 @@ export function createPlane(mesh, spawn) {
   const plane = {
     mesh,
     speed: spawn.speed ?? FLIGHT.cruise * 0.86,
-    throttle: 0.72,
+    throttle: spawn.throttle ?? 0.72,
     pitch: 0,
     roll: 0,
     yaw: 0,
