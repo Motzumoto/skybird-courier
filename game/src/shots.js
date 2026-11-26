@@ -74,7 +74,11 @@ export const SHOTS = {
     const gate = pickLowGate(course, 2) ?? null;
     if (!gate) return { kind: 'survey' };
     const from = behindGate(gate, 520, 40);
-    const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 10, 0)), { roll: 0.18, pitch: 0.06 });
+    // Aimed off the sun's bearing, so the glare sits at the edge of frame and the sky band above
+    // the ridge stays brighter than the ash below it.
+    const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(gate.ring.quaternion);
+    const across = new THREE.Vector3(normal.z, 0, -normal.x).normalize();
+    const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 34, 0)).addScaledVector(across, -190), { roll: 0.18, pitch: -0.1 });
     const bursts = [];
     const flashes = [];
     const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(pose.quaternion);
