@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { WORLD } from '../config.js';
 import { groundAt, ISLANDS, AIRSTRIPS, fbm, noise } from './heightfield.js';
 
-const SAND = new THREE.Color('#d8c79a');
+const SAND = new THREE.Color('#c6b089');
 const WET = new THREE.Color('#7d7158');
 const SHOAL = new THREE.Color('#12495a');
 const MOSS = new THREE.Color('#5c6f3c');
@@ -15,9 +15,8 @@ const EMBER = new THREE.Color('#7a4126');
 
 function groundColor(height, slope, volcanic) {
   const c = new THREE.Color();
-  if (height < 0) c.copy(SHOAL).lerp(WET, Math.max(-1, height) / -1.2 + 1);
-  else if (height < 1.6) c.copy(WET);
-  else if (height < 6) c.copy(WET).lerp(SAND, (height - 1.6) / 4.4);
+  if (height < 1.3) c.copy(SHOAL).lerp(WET, THREE.MathUtils.clamp(height / 1.3, 0, 1) * 0.8);
+  else if (height < 6) c.copy(WET).lerp(SAND, (height - 1.3) / 4.7);
   else if (height < 26) c.copy(SAND).lerp(MOSS, (height - 4) / 22);
   else if (height < 200) c.copy(MOSS).lerp(JUNGLE, Math.min(1, (height - 26) / 120));
   else if (volcanic) c.copy(ASH).lerp(BASALT, Math.min(1, (height - 200) / 260));
@@ -71,7 +70,7 @@ function buildSea() {
   const geo = new THREE.PlaneGeometry(WORLD.size * 3, WORLD.size * 3, 110, 110);
   geo.rotateX(-Math.PI / 2);
   const material = new THREE.MeshStandardMaterial({
-    color: '#2b7d8f',
+    color: '#2f8798',
     roughness: 0.34,
     metalness: 0.3,
     transparent: true,

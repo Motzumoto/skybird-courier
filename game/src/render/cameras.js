@@ -115,7 +115,7 @@ export function createFlare(camera, sunDirection) {
       const y = THREE.MathUtils.clamp(projected.y * 1.05, -1.2, 1.2);
       streak.position.x = x * 1.05;
       streak.position.y = y * 0.62 + 0.12;
-      streak.material.opacity = strength * 0.22;
+      streak.material.opacity = strength * 0.14;
       ghosts.forEach((ghost, i) => {
         ghost.position.x = -x * (0.9 + i * 0.5);
         ghost.position.y = -y * (0.55 + i * 0.3);

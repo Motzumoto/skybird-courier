@@ -297,6 +297,16 @@ if (shot) {
   plane.speed = pose.speed;
   plane.setThrottle(pose.throttle);
   rig.mode = pose.camera;
+  // Debug switches: ?hide=sea|clouds lets a probe isolate what a reviewer is seeing.
+  const hide = new URLSearchParams(location.search).get('hide');
+  if (hide) scene.traverse((o) => {
+    const mat = Array.isArray(o.material) ? o.material[0] : o.material;
+    if (!mat) return;
+    if (hide === 'sea' && o.isMesh && o.geometry?.type === 'PlaneGeometry' && !mat.map && !mat.transparent) o.visible = false;
+    if (hide === 'clouds' && o.isSprite && mat.map && mat.blending === THREE.NormalBlending) o.visible = false;
+    if (hide === 'dome' && o.isMesh && o.material.type === 'ShaderMaterial') o.visible = false;
+    if (hide === 'far' && o.isSprite) o.visible = false;
+  });
   if (pose.gate) course.solo(pose.gate);
   if (pose.hull) plane.hull = pose.hull;
   shotSmoke = Boolean(pose.smoke);
