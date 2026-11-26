@@ -12,7 +12,7 @@ export function bindInput(handlers) {
     if (event.repeat) return;
     DOWN.add(event.code);
     if (event.code === 'KeyC') handlers.camera?.();
-    if (event.code === 'KeyP' || event.code === 'Escape') handlers.pause?.();
+    if (event.code === 'KeyP' || event.code === 'Escape' || event.code === 'Enter') handlers.pause?.(event.code);
     if (event.code === 'KeyR') handlers.restart?.();
     if (event.code === 'KeyH') handlers.hud?.();
     if (event.code === 'KeyF') handlers.flaps?.();

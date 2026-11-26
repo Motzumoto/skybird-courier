@@ -265,7 +265,9 @@ function restart() {
 
 bindInput({
   camera: () => rig.toggle(),
-  pause: () => {
+  pause: (code) => {
+    // Enter only ever resumes, so a stray press mid-flight does not stop the sortie.
+    if (state === 'flying' && code === 'Enter') return;
     if (state === 'flying') {
       state = 'paused';
       screens.showPause(true);
