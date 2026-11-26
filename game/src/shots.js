@@ -31,7 +31,7 @@ export const SHOTS = {
     if (!gate) return { kind: 'courier' };
     const from = behindGate(gate, 330, 58);
     const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 12, 0)), { roll: -0.1, pitch: 0.02 });
-    return { ...pose, speed: 79, throttle: 0.83, camera: 'chase', kind: 'courier' };
+    return { ...pose, speed: 79, throttle: 0.83, camera: 'chase', kind: 'courier', gate };
   },
 
   // Final approach: the lamp, the numbers and the strip filling the windscreen.
@@ -41,10 +41,10 @@ export const SHOTS = {
     const pad = airstripPad(strip);
     const heading = strip.heading;
     // Approach from whichever end runs downhill to the sea, so the strip reads against water.
-    const endA = new THREE.Vector3(strip.x + Math.sin(heading) * (strip.length / 2 + 250), 0, strip.z + Math.cos(heading) * (strip.length / 2 + 250));
-    const endB = new THREE.Vector3(strip.x - Math.sin(heading) * (strip.length / 2 + 250), 0, strip.z - Math.cos(heading) * (strip.length / 2 + 250));
+    const endA = new THREE.Vector3(strip.x + Math.sin(heading) * (strip.length / 2 + 150), 0, strip.z + Math.cos(heading) * (strip.length / 2 + 150));
+    const endB = new THREE.Vector3(strip.x - Math.sin(heading) * (strip.length / 2 + 150), 0, strip.z - Math.cos(heading) * (strip.length / 2 + 150));
     const from = groundAt(endA.x, endA.z) < groundAt(endB.x, endB.z) ? endA : endB;
-    from.y = pad + 26;
+    from.y = pad + 19;
     const to = new THREE.Vector3(strip.x, pad + 3, strip.z);
     const pose = aim(from, to, { roll: 0.05, pitch: -0.03 });
     return { ...pose, speed: 56, throttle: 0.46, camera: 'cockpit', kind: 'medevac' };
@@ -56,16 +56,16 @@ export const SHOTS = {
     if (!gate) return { kind: 'survey' };
     const from = behindGate(gate, 420, 128);
     const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 16, 0)), { roll: 0.18, pitch: 0.03 });
-    return { ...pose, speed: 84, throttle: 0.95, camera: 'chase', kind: 'survey' };
+    return { ...pose, speed: 84, throttle: 0.95, camera: 'chase', kind: 'survey', gate };
   },
 
   // Windward cliffs: the courier on the coast run, sea and rock below the wing.
   cliffs: ({ course }) => {
-    const gate = course?.gates[5] ?? course?.gates[4] ?? null;
+    const gate = pickLonelyGate(course, 3) ?? course?.gates[5] ?? null;
     if (!gate) return { kind: 'courier' };
-    const from = behindGate(gate, 320, 54);
-    const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, -14, 0)), { roll: -0.17, pitch: 0.02 });
-    return { ...pose, speed: 76, throttle: 0.72, camera: 'chase', kind: 'courier' };
+    const from = behindGate(gate, 560, 74);
+    const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 16, 0)), { roll: -0.14, pitch: 0.02 });
+    return { ...pose, speed: 76, throttle: 0.72, camera: 'chase', kind: 'courier', gate };
   },
 };
 
@@ -78,6 +78,25 @@ function pickLowGate(course, from) {
     const height = groundAt(gate.position.x, gate.position.z);
     if (height < bestHeight) {
       bestHeight = height;
+      best = gate;
+    }
+  }
+  return best;
+}
+
+// The gate with the most room around it, so no second ring crops into the frame.
+function pickLonelyGate(course, from) {
+  if (!course) return null;
+  let best = null;
+  let bestGap = -1;
+  for (const gate of course.gates.slice(from)) {
+    let gap = Infinity;
+    for (const other of course.gates) {
+      if (other === gate) continue;
+      gap = Math.min(gap, other.position.distanceTo(gate.position));
+    }
+    if (gap > bestGap) {
+      bestGap = gap;
       best = gate;
     }
   }

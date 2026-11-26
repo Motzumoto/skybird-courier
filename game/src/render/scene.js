@@ -129,7 +129,7 @@ export function buildSky(scene) {
   }
   scene.add(clouds);
 
-  scene.fog = new THREE.Fog('#cfd8d2', WORLD.fogNear, WORLD.fogFar);
+  scene.fog = new THREE.Fog('#c6c2ad', WORLD.fogNear, WORLD.fogFar);
   scene.background = new THREE.Color('#8fb2c4');
   return { sun, clouds };
 }

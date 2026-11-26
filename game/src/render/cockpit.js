@@ -7,7 +7,7 @@ export function buildCockpit() {
   const group = new THREE.Group();
   group.position.set(0, 0, 0);
 
-  const shell = new THREE.MeshStandardMaterial({ color: '#3c464c', roughness: 0.7, metalness: 0.2, side: THREE.DoubleSide });
+  const shell = new THREE.MeshStandardMaterial({ color: '#48545b', roughness: 0.66, metalness: 0.18, side: THREE.DoubleSide, emissive: '#1d262a', emissiveIntensity: 0.85 });
   const trim = new THREE.MeshStandardMaterial({ color: '#151b1d', roughness: 0.55, metalness: 0.4 });
   const panelFluoro = new THREE.MeshStandardMaterial({ color: '#121a1c', emissive: '#7d4a16', emissiveIntensity: 0.42, roughness: 0.6 });
 
@@ -24,7 +24,7 @@ export function buildCockpit() {
   group.add(shield, dash, panel);
 
   // Six lit dials on the panel, and the switch row under them.
-  const dialGeo = new THREE.CircleGeometry(0.03, 14);
+  const dialGeo = new THREE.CircleGeometry(0.036, 14);
   const dialLit = new THREE.MeshBasicMaterial({ color: '#ffd79a' });
   for (let i = 0; i < 6; i++) {
     const dial = new THREE.Mesh(dialGeo, dialLit);
@@ -55,7 +55,7 @@ export function buildCockpit() {
   group.add(header);
 
   // Panel glow so the cockpit is the brightest thing at dusk.
-  const glow = new THREE.PointLight('#ffb469', 1.5, 2.2, 2);
+  const glow = new THREE.PointLight('#ffb469', 3.2, 3, 2);
   glow.position.set(0, -0.42, -0.62);
   group.add(glow);
 

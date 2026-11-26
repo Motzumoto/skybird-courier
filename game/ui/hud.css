@@ -39,11 +39,11 @@ html, body {
 .pit-horizon {
   position: absolute;
   left: 50%;
-  top: 37%;
+  top: 30%;
   width: 340px;
   height: 300px;
   margin: -120px 0 0 -170px;
-  opacity: 0.55;
+  opacity: 0.4;
 }
 .pit-horizon::before, .pit-horizon::after {
   content: "";
@@ -150,6 +150,8 @@ html, body {
 }
 .mission h2 { margin: 0; font-size: 13px; letter-spacing: 0.22em; color: var(--amber); text-transform: uppercase; }
 .mission p { margin: 6px 0 9px; font-size: 12px; line-height: 1.5; letter-spacing: 0.05em; color: rgba(246, 241, 226, 0.86); }
+.navline { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.2em; color: var(--amber); margin-bottom: 6px; }
+.navline span { color: rgba(246, 241, 226, 0.72); }
 .progress { height: 4px; background: rgba(246, 241, 226, 0.18); }
 .progress i { display: block; height: 100%; width: 0; background: var(--amber); transition: width 220ms linear; }
 

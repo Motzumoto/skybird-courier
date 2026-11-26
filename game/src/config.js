@@ -6,7 +6,7 @@ export const WORLD = {
   grid: 200,           // heightfield resolution per side
   maxHeight: 620,
   fogNear: 1500,
-  fogFar: 7200,
+  fogFar: 9600,
   sunElevation: 0.19,  // golden hour
 };
 

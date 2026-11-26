@@ -17,6 +17,8 @@ export function createHud(mission) {
     name: document.getElementById('m-name'),
     text: document.getElementById('m-text'),
     progress: document.querySelector('#m-progress i'),
+    count: document.getElementById('m-count'),
+    bearing: document.getElementById('m-bearing'),
     banner: document.getElementById('banner'),
     garble: document.getElementById('garble'),
     gauges: [...document.querySelectorAll('.gauge')],
@@ -49,6 +51,16 @@ export function createHud(mission) {
 
       const fraction = totalGates > 0 ? gatesDone / totalGates : 0;
       el.progress.style.width = `${Math.round(fraction * 100)}%`;
+      el.count.textContent = `${gatesDone} / ${totalGates}`;
+      const gate = course?.gates[course.index];
+      if (gate) {
+        const distance = Math.round(gate.position.distanceTo(plane.position));
+        const bearing = ((Math.atan2(gate.position.x - plane.position.x, -(gate.position.z - plane.position.z)) * 180) / Math.PI + 360) % 360;
+        const off = Math.round((bearing - headingFromQuaternion(plane.quaternion) + 540) % 360 - 180);
+        el.bearing.textContent = `GATE ${distance} M ${off === 0 ? 'AHEAD' : `${Math.abs(off)}° ${off < 0 ? 'LEFT' : 'RIGHT'}`}`;
+      } else {
+        el.bearing.textContent = 'ALL GATES CLEAR';
+      }
       this.drawMap(plane, course);
     },
     drawMap(plane, course) {

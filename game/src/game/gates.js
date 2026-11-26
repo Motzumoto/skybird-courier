@@ -83,6 +83,11 @@ export function buildCourse(scene, route) {
         gate.ring.userData.light.intensity = active ? 70 : 10;
       });
     },
+    // For a screenshot: show only the gate being lined up and the one after it.
+    solo(keep) {
+      const next = gates[gates.indexOf(keep) + 1];
+      for (const gate of gates) gate.group.visible = gate === keep || gate === next;
+    },
     check(plane) {
       const gate = gates[this.index];
       if (!gate || gate.passed) return null;

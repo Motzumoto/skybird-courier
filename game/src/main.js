@@ -269,6 +269,7 @@ if (shot) {
   plane.speed = pose.speed;
   plane.setThrottle(pose.throttle);
   rig.mode = pose.camera;
+  if (pose.gate) course.solo(pose.gate);
   rig.update(plane, 0.016, 0.5, true);
   state = 'shot';
   hud.refresh(plane, course, 0, course.gates.length);
