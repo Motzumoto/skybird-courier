@@ -1,14 +1,14 @@
 // Boot, the frame loop and the sortie rules: gates, survey passes, landings, crashes and the report.
 
 import * as THREE from 'three';
-import { PLAY, MISSION_KINDS } from './config.js';
+import { MISSION_KINDS } from './config.js';
 import { createRenderer, buildSky, applyCameraSettings } from './render/scene.js';
 import { createCameraRig, createFlare } from './render/cameras.js';
 import { buildCockpit } from './render/cockpit.js';
 import { buildTerrain, animateSea, airstripPad } from './terrain/buildIslands.js';
 import { buildVegetation } from './terrain/vegetation.js';
 import { buildBridge } from './terrain/buildBridge.js';
-import { AIRSTRIPS, ISLANDS, groundAt } from './terrain/heightfield.js';
+import { AIRSTRIPS } from './terrain/heightfield.js';
 import { buildPlane } from './aircraft/buildPlane.js';
 import { createPlane } from './aircraft/flightModel.js';
 import { buildCourse } from './game/gates.js';

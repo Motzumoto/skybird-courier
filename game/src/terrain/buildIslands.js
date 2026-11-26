@@ -2,7 +2,7 @@
 
 import * as THREE from 'three';
 import { WORLD } from '../config.js';
-import { groundAt, ISLANDS, AIRSTRIPS, fbm, noise } from './heightfield.js';
+import { groundAt, ISLANDS, AIRSTRIPS, noise } from './heightfield.js';
 
 const SAND = new THREE.Color('#c6b089');
 const WET = new THREE.Color('#7d7158');
