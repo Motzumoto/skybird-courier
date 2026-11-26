@@ -113,19 +113,30 @@ function buildAirstrip(strip) {
   group.position.set(strip.x, padHeight, strip.z);
   group.rotation.y = strip.heading;
 
+  // A flat sheet on the levelled pad rather than a box: no faces to read as a slab from a
+  // low final, and the graded ground does the work at the edges.
   const asphalt = new THREE.Mesh(
-    new THREE.BoxGeometry(strip.width, 1.6, strip.length),
+    new THREE.PlaneGeometry(strip.width, strip.length),
     new THREE.MeshStandardMaterial({ color: '#2c3033', roughness: 0.95 }),
   );
-  asphalt.position.y = 0;
+  asphalt.rotation.x = -Math.PI / 2;
+  asphalt.position.y = 0.04;
+  // Gravel shoulders, so the asphalt edge is broken by a strip of grade rather than a hard line.
+  const shoulder = new THREE.MeshStandardMaterial({ color: '#6d6552', roughness: 1 });
+  for (const side of [-1, 1]) {
+    const grade = new THREE.Mesh(new THREE.PlaneGeometry(5, strip.length), shoulder);
+    grade.rotation.x = -Math.PI / 2;
+    grade.position.set(side * (strip.width / 2 + 2.5), 0.03, 0);
+    group.add(grade);
+  }
   asphalt.receiveShadow = true;
   group.add(asphalt);
 
   const dash = new THREE.MeshStandardMaterial({ color: '#f2ecd8', roughness: 0.75, emissive: '#5a5238', emissiveIntensity: 0.4 });
   const edge = new THREE.MeshStandardMaterial({ color: '#cfc39f', emissive: '#6a5c33', emissiveIntensity: 0.5 });
-  for (let i = -strip.length / 2 + 26; i < strip.length / 2 - 20; i += 46) {
+  for (let i = -strip.length / 2 + 48; i < strip.length / 2 - 20; i += 46) {
     const mark = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.22, 26), dash);
-    mark.position.set(0, 0.9, i);
+    mark.position.set(0, 0.16, i);
     group.add(mark);
   }
   for (const side of [-1, 1]) {
@@ -139,9 +150,9 @@ function buildAirstrip(strip) {
   // Threshold piano keys and the designator at each end, so the strip reads as a runway from the air.
   const paint = new THREE.MeshStandardMaterial({ color: '#f7f1dc', emissive: '#6b6250', emissiveIntensity: 0.5, roughness: 0.8 });
   for (const end of [-1, 1]) {
-    for (let i = 0; i < 6; i++) {
-      const key = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.24, 14), paint);
-      key.position.set(-strip.width / 2 + 4 + i * 3.6, 0.9, end * (strip.length / 2 - 10));
+    for (let i = 0; i < 5; i++) {
+      const key = new THREE.Mesh(new THREE.BoxGeometry(3, 0.24, 16), paint);
+      key.position.set(-strip.width / 2 + 7 + i * 6, 0.16, end * (strip.length / 2 - 11));
       group.add(key);
     }
     const canvas = document.createElement('canvas');
@@ -161,7 +172,7 @@ function buildAirstrip(strip) {
     );
     number.rotation.x = -Math.PI / 2;
     number.rotation.z = end > 0 ? Math.PI : 0;
-    number.position.set(0, 0.96, end * (strip.length / 2 - 26));
+    number.position.set(0, 0.18, end * (strip.length / 2 - 38));
     group.add(number);
   }
 
