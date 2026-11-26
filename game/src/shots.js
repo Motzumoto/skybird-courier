@@ -36,13 +36,13 @@ export const SHOTS = {
   cover: ({ course }) => {
     const gate = course?.gates[1] ?? course?.gates[0] ?? null;
     if (!gate) return { kind: 'courier' };
-    const from = behindGate(gate, 210, 44);
+    const from = behindGate(gate, 330, 118);
     // Slide the camera off the gate axis so the ring and the aircraft do not sit on top of
     // each other, and the shot reads as a diagonal composition.
     const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(gate.ring.quaternion);
-    from.addScaledVector(new THREE.Vector3(normal.z, 0, -normal.x).normalize(), 22);
+    from.addScaledVector(new THREE.Vector3(normal.z, 0, -normal.x).normalize(), 38);
     const side = new THREE.Vector3(normal.z, 0, -normal.x).normalize();
-    const look = gate.position.clone().add(new THREE.Vector3(0, 26, 0)).addScaledVector(side, -78);
+    const look = gate.position.clone().add(new THREE.Vector3(0, 34, 0)).addScaledVector(side, -96);
     const pose = aim(from, look, { roll: -0.1, pitch: 0.02 });
     return { ...pose, speed: 79, throttle: 0.83, camera: 'chase', kind: 'courier', gate };
   },
@@ -122,12 +122,12 @@ export const SHOTS = {
     if (gate && best > 380) gate = null;
     const anchor = gate ? gate.position : BRIDGE.midpoint;
     const dir = (gate ? BRIDGE.midpoint.clone().sub(anchor) : axis.clone()).setY(0).normalize();
-    const pos = anchor.clone().addScaledVector(dir, gate ? -230 : -250).addScaledVector(across, 215);
-    pos.y = anchor.y + (gate ? -5 : 20);
-    const look = anchor.clone().addScaledVector(dir, gate ? 40 : 10).addScaledVector(across, 45);
+    const pos = anchor.clone().addScaledVector(dir, gate ? -230 : -250).addScaledVector(across, 258);
+    pos.y = anchor.y + (gate ? 4 : 26);
+    const look = anchor.clone().addScaledVector(dir, gate ? 40 : 10).addScaledVector(across, 72);
     look.y += gate ? 8 : 40;
     const pose = aim(pos, look, { roll: 0.09, pitch: -0.03 });
-    return { ...pose, speed: 84, throttle: 0.95, camera: 'chase', kind: 'courier', gate };
+    return { ...pose, speed: 84, throttle: 0.95, camera: 'chase', kind: 'courier', gate, zoom: 1.55 };
   },
 
   // Windward cliffs: the courier on the coast run, sea and rock below the wing.

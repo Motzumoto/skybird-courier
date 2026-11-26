@@ -9,6 +9,12 @@ const up = new THREE.Vector3(0, 1, 0);
 export function createCameraRig(camera) {
   const rig = {
     mode: 'chase',
+    // A still frame can pull the chase camera in, so the aircraft reads as the subject instead of
+    // a speck in its own game.
+    zoom: 1,
+    // Height of the point the lens aims at, in metres above the hull. A still drops it, so the
+    // aircraft sits clear of the instrument panel instead of behind it.
+    lift: 1.5,
     shake: 0,
     smoothUp: up.clone(),
     desired: new THREE.Vector3(),
@@ -33,8 +39,8 @@ export function createCameraRig(camera) {
 
     rig.desired
       .copy(back)
-      .multiplyScalar(CAMERA.chaseBack + speedFactor * 4.4)
-      .add(new THREE.Vector3(0, CAMERA.chaseUp, 0))
+      .multiplyScalar((CAMERA.chaseBack + speedFactor * 4.4) / rig.zoom)
+      .add(new THREE.Vector3(0, CAMERA.chaseUp / rig.zoom, 0))
       .applyQuaternion(body.quaternion)
       .add(body.position);
 
@@ -46,7 +52,7 @@ export function createCameraRig(camera) {
     rig.smoothUp.lerp(up.clone().applyQuaternion(body.quaternion), 0.06);
     camera.up.copy(rig.smoothUp).lerp(up, 0.62).normalize();
 
-    rig.look.copy(body.position).add(new THREE.Vector3(0, 1.5, -18).applyQuaternion(body.quaternion));
+    rig.look.copy(body.position).add(new THREE.Vector3(0, rig.lift, -18).applyQuaternion(body.quaternion));
     camera.lookAt(rig.look);
 
     if (rig.shake > 0.001) {

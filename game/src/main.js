@@ -343,6 +343,11 @@ if (shot) {
   plane.speed = pose.speed;
   plane.setThrottle(pose.throttle);
   rig.mode = pose.camera;
+  // Stills pull the chase camera in: at play distance the courier is too small to be the subject.
+  if (pose.camera === 'chase') {
+    rig.zoom = pose.zoom ?? 1.8;
+    rig.lift = pose.lift ?? 0.3;
+  }
   // A still frame wants the furniture out of the sightline: bigger and lower in the cockpit view.
   if (pose.camera === 'cockpit') {
     cockpit.scale.setScalar(1.2);
