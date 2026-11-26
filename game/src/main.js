@@ -16,6 +16,7 @@ import { createMission } from './game/missions.js';
 import { buildTraffic } from './game/traffic.js';
 import { createThreat } from './game/threat.js';
 import { createSpray } from './render/spray.js';
+import { createCargo } from './render/cargo.js';
 import { createDamage } from './aircraft/damage.js';
 import { createHud } from './ui/hud.js';
 import { createScreens } from './ui/screens.js';
@@ -37,6 +38,7 @@ const sea = terrain.children.find((child) => child.userData?.wave);
 const traffic = buildTraffic(scene);
 const threat = createThreat(scene);
 const spray = createSpray(scene);
+const cargo = createCargo(scene);
 let damage = null;
 const rig = createCameraRig(camera);
 const cockpit = buildCockpit();
@@ -216,6 +218,7 @@ function frame() {
       audio.thud(heavy ? 0.8 : 0.45);
     }
     spray.update(dt);
+    cargo.update(dt);
     rig.update(plane, dt, plane.speed / 140);
     damage?.update(dt);
     damage?.frame(dt);
@@ -287,6 +290,9 @@ bindInput({
     if (!result) return;
     if (result === 'released') {
       mission.dwell += 1;
+      cargo.release(plane.position, new THREE.Vector3(0, 0, -1).applyQuaternion(plane.quaternion), plane.speed);
+      audio.thud(0.35);
+      rig.kick(0.6);
       hud.banner('CRATES AWAY');
       hud.brief(`The village has its crates. Finish the rings, then land at ${mission.brief.finish}.`);
     } else {
