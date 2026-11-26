@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Skybird Courier — the Armada Isles</title>
+<link rel="stylesheet" href="ui/hud.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js" } }
+</script>
+</head>
+<body>
+<canvas id="sky"></canvas>
+
+<div id="hud" class="hud" aria-hidden="true">
+  <div class="pit-horizon"><span></span></div>
+  <div class="instruments">
+    <div class="gauge speed"><b id="g-speed">000</b><i>KTS</i><u>STALL</u></div>
+    <div class="gauge alt"><b id="g-alt">0000</b><i>FEET</i><u>PULL UP</u></div>
+    <div class="gauge heading"><b id="g-hdg">000</b><i>DEG</i><u id="g-wind">WIND</u></div>
+  </div>
+  <div class="tape"><div id="g-fuel" class="fuel"></div><div id="g-dmg" class="dmg"></div><span>FUEL / AIRFRAME</span></div>
+  <div class="throttle"><div id="g-thr"></div><span>THROTTLE</span></div>
+  <div class="minimap"><canvas id="map" width="176" height="176"></canvas><span>ADRIA ATLAS</span></div>
+  <div class="mission"><h2 id="m-name">—</h2><p id="m-text">—</p><div id="m-progress" class="progress"><i></i></div></div>
+  <div id="banner" class="banner"></div>
+  <div class="garble" id="garble"></div>
+</div>
+
+<div id="title" class="screen">
+  <h1>SKYBIRD<span>COURIER</span></h1>
+  <p class="tag">Carry the mail through the Armada Isles. Skim the calderas, keep the engine lit, land where the lamp burns.</p>
+  <div class="keys">
+    <span><b>W</b>/<b>S</b> pitch</span><span><b>A</b>/<b>D</b> roll</span><span><b>Q</b>/<b>E</b> rudder</span>
+    <span><b>Shift</b>/<b>Ctrl</b> throttle</span><span><b>C</b> camera</span><span><b>F</b> flaps</span><span><b>P</b> pause</span>
+  </div>
+  <button id="start">TAKE OFF FROM PORTO SANA</button>
+  <p class="foot">Built by an AI agent for make.fun's “Make the best flight game” bounty. Keyboard and mouse, no network.</p>
+</div>
+
+<div id="pause" class="screen hidden"><h1>PAUSED</h1><p class="tag">The kestrels can wait.</p><button id="resume">RESUME</button></div>
+
+<div id="result" class="screen hidden">
+  <h1 id="r-title">SORTIE COMPLETE</h1>
+  <p class="tag" id="r-text"></p>
+  <div class="tally" id="r-tally"></div>
+  <button id="again">FLY AGAIN</button>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

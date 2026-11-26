@@ -1,0 +1,271 @@
+// Boot, the frame loop and the sortie rules: gates, survey passes, landings, crashes and the report.
+
+import * as THREE from 'three';
+import { PLAY, MISSION_KINDS } from './config.js';
+import { createRenderer, buildSky, applyCameraSettings } from './render/scene.js';
+import { createCameraRig } from './render/cameras.js';
+import { buildTerrain, animateSea, airstripPad } from './terrain/buildIslands.js';
+import { AIRSTRIPS, ISLANDS, groundAt } from './terrain/heightfield.js';
+import { buildPlane } from './aircraft/buildPlane.js';
+import { createPlane } from './aircraft/flightModel.js';
+import { buildCourse } from './game/gates.js';
+import { createMission } from './game/missions.js';
+import { buildTraffic } from './game/traffic.js';
+import { createThreat } from './game/threat.js';
+import { createHud } from './ui/hud.js';
+import { createScreens } from './ui/screens.js';
+import { createAudio } from './audio/engineSound.js';
+import { recordSortie } from './save/logbook.js';
+import { SHOTS, shotName } from './shots.js';
+import { bindInput, readInput, inputIdle, clearInput } from './input.js';
+
+const canvas = document.getElementById('sky');
+const renderer = createRenderer(canvas);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.4, 12000);
+applyCameraSettings(camera);
+buildSky(scene);
+const terrain = buildTerrain(scene);
+const sea = terrain.children.find((child) => child.userData?.wave);
+const traffic = buildTraffic(scene);
+const threat = createThreat(scene);
+const rig = createCameraRig(camera);
+const screens = createScreens();
+const audio = createAudio();
+
+let plane = null;
+let course = null;
+let mission = null;
+let hud = null;
+let state = 'title';
+let elapsed = 0;
+let chosen = MISSION_KINDS[Math.floor(Math.random() * MISSION_KINDS.length)];
+let ringCountdown = 0;
+let lastHudPaint = 0;
+
+const spawnPose = (() => {
+  const strip = AIRSTRIPS[0];
+  const position = new THREE.Vector3(strip.x, airstripPad(strip) + 1.7, strip.z + 120);
+  const quaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, strip.heading, 0, 'YXZ'));
+  return { position, quaternion, speed: 62 };
+})();
+
+function mount(kind, pose) {
+  if (plane) scene.remove(plane.mesh);
+  if (course) scene.remove(course.root);
+  threat.reset();
+
+  mission = createMission(kind);
+  course = buildCourse(scene, mission.brief.route);
+  course.highlight(0);
+  hud = createHud(mission);
+  ringCountdown = 1.2;
+
+  const mesh = buildPlane();
+  scene.add(mesh);
+  plane = createPlane(mesh, pose ?? spawnPose);
+  if (pose?.speed) plane.speed = pose.speed;
+  if (pose?.throttle !== undefined) plane.setThrottle(pose.throttle);
+  rig.mode = pose?.camera ?? 'chase';
+  rig.update(plane, 0.016, 0.5, true);
+  elapsed = 0;
+}
+
+function begin() {
+  audio.start();
+  chosen = MISSION_KINDS[Math.floor(Math.random() * MISSION_KINDS.length)];
+  screens.hideAll();
+  mount(chosen);
+  state = 'flying';
+  hud.banner('CLEARED FOR THE RUN');
+}
+
+function endSortie(completed, headline) {
+  if (state !== 'flying') return;
+  state = 'over';
+  if (plane.alive === false) plane.mesh.userData.prop.rotation.z = 0.4;
+  const book = recordSortie({ completed, gates: course.passed, seconds: elapsed, chosen });
+  screens.report({
+    completed,
+    headline,
+    detail: `${mission.brief.name} flown in ${Math.round(elapsed)}s with ${Math.max(0, Math.round(plane.hull))}% airframe left. ${book.sorties} sorties in the logbook.`,
+    gates: course.passed,
+    seconds: elapsed,
+    hull: plane.hull,
+    missions: course.gates.length,
+  });
+}
+
+function checkLanding() {
+  const strip = mission.strip();
+  if (!strip) return false;
+  const dx = plane.position.x - strip.x;
+  const dz = plane.position.z - strip.z;
+  const along = dx * Math.sin(strip.heading) + dz * Math.cos(strip.heading);
+  const across = dx * Math.cos(strip.heading) - dz * Math.sin(strip.heading);
+  const onStrip = Math.abs(along) < strip.length / 2 && Math.abs(across) < strip.width;
+  if (onStrip && plane.onGround && plane.speed < 26 && plane.alive) return true;
+  return false;
+}
+
+function rules(dt) {
+  mission.update(dt, plane);
+
+  if (ringCountdown > 0) ringCountdown -= dt;
+
+  const beaten = course.check(plane);
+  if (beaten) {
+    audio.chime();
+    hud.banner(`GATE ${course.passed}/${course.gates.length}`);
+    rig.kick(0.5);
+  }
+
+  const surveyDone = mission.zones.every((zone) => zone.done);
+  if (course.index >= course.gates.length) {
+    if (mission.needsLanding()) {
+      hud.text.textContent = `All passes flown. Put down on ${mission.brief.finish} strip, wing low, gear down.`;
+      if (checkLanding()) {
+        audio.thud(0.7);
+        return endSortie(true, 'Landed');
+      }
+    }
+  }
+
+  if (mission.zones.length) {
+    const zone = mission.zones.find((z) => !z.done);
+    if (zone) {
+      const island = ISLANDS[zone.island];
+      const distance = Math.hypot(plane.position.x - island.x, plane.position.z - island.z);
+      if (!zone.done && distance < zone.radius && !zone.inside) {
+        hud.text.textContent = 'Climb below ninety metres and hold the pass over the rim.';
+      }
+    }
+  }
+
+  const flakDamage = threat.update(dt, plane, mission.kind === 'survey' && course.index > 1);
+  if (flakDamage > 0) {
+    plane.hull = Math.max(0, plane.hull - flakDamage);
+    audio.thud(0.5);
+    rig.kick(1.3);
+    hud.banner('FLAK — AIRFRAME HIT');
+    if (plane.hull <= 0) plane.crash('The flak found the engine.');
+  }
+
+  if (!plane.alive) {
+    rig.kick(2.2);
+    audio.thud(1.4);
+    endSortie(false, plane.crashReason ?? 'The airframe is lost.');
+  }
+
+  if (plane.fuel <= 0.0001 && !plane.alive) return;
+
+  const strip = mission.strip();
+  if (strip && course.index >= course.gates.length) {
+    const distance = Math.hypot(plane.position.x - strip.x, plane.position.z - strip.z);
+    if (distance < 2200 && plane.position.y - plane.groundHeight < 120) {
+      hud.banner('FINAL — LAND AT THE LAMP');
+    }
+  }
+}
+
+const clock = new THREE.Clock();
+
+function frame() {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const time = clock.elapsedTime;
+
+  if (state === 'flying' || state === 'over') {
+    elapsed += dt;
+    audio.update(plane.throttle, plane.speed);
+    if (state === 'flying') plane.update(dt, readInput());
+    else plane.update(dt, inputIdle);
+    rig.update(plane, dt, plane.speed / 140);
+    traffic.update(time, dt);
+    animateSea(sea, time);
+    if (state === 'flying') rules(dt);
+    if (hud && time - lastHudPaint > 0.06) {
+      lastHudPaint = time;
+      hud.refresh(plane, course, course.passed, course.gates.length);
+    }
+  } else if (state === 'title') {
+    const orbit = time * 0.06;
+    camera.position.set(Math.sin(orbit) * 2400, 760, Math.cos(orbit) * 2400);
+    camera.lookAt(0, 220, 0);
+    traffic.update(time, dt);
+    animateSea(sea, time);
+  } else if (state === 'shot') {
+    traffic.update(time, dt);
+    animateSea(sea, time);
+    rig.update(plane, dt, 0.5, true);
+    if (hud && time - lastHudPaint > 0.06) {
+      lastHudPaint = time;
+      hud.refresh(plane, course, course.passed, course.gates.length);
+    }
+  }
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+
+function restart() {
+  if (state === 'flying') return;
+  screens.hideAll();
+  mount(chosen);
+  state = 'flying';
+}
+
+bindInput({
+  camera: () => rig.toggle(),
+  pause: () => {
+    if (state === 'flying') {
+      state = 'paused';
+      screens.showPause(true);
+      clearInput();
+    } else if (state === 'paused') {
+      state = 'flying';
+      screens.showPause(false);
+    }
+  },
+  restart: () => {
+    if (state === 'over') restart();
+  },
+  hud: () => hud?.toggle(),
+  flaps: () => {
+    if (plane) plane.flaps = plane.flaps > 0.5 ? 0 : 1;
+  },
+});
+
+document.getElementById('start').addEventListener('click', begin);
+document.getElementById('resume').addEventListener('click', () => {
+  state = 'flying';
+  screens.showPause(false);
+});
+document.getElementById('again').addEventListener('click', restart);
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// A screenshot pose skips the title and flies itself still.
+const shot = shotName();
+if (shot) {
+  screens.hideAll();
+  const first = SHOTS[shot]({ course: null, strips: AIRSTRIPS });
+  mount(first.kind);
+  const pose = SHOTS[shot]({ course, strips: AIRSTRIPS });
+  plane.position.copy(pose.position);
+  plane.quaternion.copy(pose.quaternion);
+  plane.speed = pose.speed;
+  plane.setThrottle(pose.throttle);
+  rig.mode = pose.camera;
+  rig.update(plane, 0.016, 0.5, true);
+  state = 'shot';
+  hud.refresh(plane, course, 0, course.gates.length);
+} else {
+  screens.showTitle();
+  document.getElementById('hud').classList.add('hidden-hud');
+}
+
+frame();
