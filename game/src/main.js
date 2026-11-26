@@ -64,6 +64,7 @@ let chosen = MISSION_KINDS.includes(PINNED)
 let ringCountdown = 0;
 let lastHudPaint = 0;
 let lastHint = '';
+let run = 0; // how many times this brief has been flown in the session, for the report
 let shotSmoke = false;
 
 const spawnPose = (() => {
@@ -74,6 +75,7 @@ const spawnPose = (() => {
 })();
 
 function mount(kind, pose) {
+  run += 1;
   if (plane) scene.remove(plane.mesh);
   if (course) scene.remove(course.root);
   threat.reset();
@@ -125,7 +127,7 @@ function endSortie(completed, headline) {
     seconds: elapsed,
     hull: plane.hull,
     missions: mission.tally(course).total,
-    kind: `${mission.brief.name} · sortie ${book.sorties}`,
+    kind: `${mission.brief.name} · sortie ${book.sorties} · run ${run}`,
   });
 }
 
