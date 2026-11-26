@@ -92,15 +92,20 @@ export function groundAt(x, z) {
   }
   if (h > 2) h += (fbm(x * 0.021, z * 0.021, 3) - 0.5) * 12;
 
+  // Airstrips sit on a graded apron: dead flat over the runway itself, then a feathered skirt
+  // out into the hill. Grading from the centre instead cut the strip into the slope at both ends,
+  // so the threshold looked buried.
   for (const strip of AIRSTRIPS) {
     const dx = x - strip.x;
     const dz = z - strip.z;
     const along = dx * Math.sin(strip.heading) + dz * Math.cos(strip.heading);
     const across = dx * Math.cos(strip.heading) - dz * Math.sin(strip.heading);
-    const reachAlong = strip.length * 0.75;
-    const reachAcross = strip.width * 2.6;
-    const grip = Math.max(0, 1 - Math.max(Math.abs(along) / reachAlong, Math.abs(across) / reachAcross));
-    if (grip > 0) h = THREE_LERP(h, strip.pad, Math.pow(grip, 0.7));
+    const overAlong = Math.max(0, Math.abs(along) - strip.length / 2) / 170;
+    const overAcross = Math.max(0, Math.abs(across) - strip.width / 2) / 120;
+    const over = Math.max(overAlong, overAcross);
+    if (over >= 1) continue;
+    const grip = 1 - over * over * (3 - 2 * over);
+    h = THREE_LERP(h, strip.pad, grip);
   }
   return h;
 }

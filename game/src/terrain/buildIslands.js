@@ -155,19 +155,21 @@ function buildAirstrip(strip) {
       key.position.set(-strip.width / 2 + 7 + i * 6, 0.16, end * (strip.length / 2 - 11));
       group.add(key);
     }
+    // A big clean canvas with anisotropy: at 256px the designator came out as a blur from the air.
     const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 256;
+    canvas.width = 512;
+    canvas.height = 512;
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#f7f1dc';
-    ctx.font = 'bold 208px "DIN Alternate", Impact, sans-serif';
+    ctx.font = 'bold 260px "DIN Alternate", Impact, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(strip.designator ?? '09', 128, 140);
+    ctx.fillText(strip.designator ?? '09', 256, 262);
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
     const number = new THREE.Mesh(
-      new THREE.PlaneGeometry(23, 23),
+      new THREE.PlaneGeometry(19, 19),
       new THREE.MeshBasicMaterial({ map: tex, transparent: true }),
     );
     number.rotation.x = -Math.PI / 2;

@@ -236,6 +236,10 @@ html, body {
 #hud.shot-hud {
   opacity: 0.74;
 }
+/* A cockpit still has the frame and the strip for lines, so the reticle comes out entirely. */
+#hud.shot-hud.no-reticle .pit-horizon {
+  display: none;
+}
 /* The gate rings already give the aiming shape, so the reticle steps back in a still frame. */
 #hud.shot-hud .pit-horizon {
   opacity: 0.34;

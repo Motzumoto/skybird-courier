@@ -346,7 +346,10 @@ if (shot) {
   // A still frame wants the furniture out of the sightline: bigger and lower in the cockpit view.
   if (pose.camera === 'cockpit') {
     cockpit.scale.setScalar(1.2);
-    cockpit.position.y = -0.085;
+    cockpit.position.y = -0.16;
+    // The glass and the runway already give the shot its lines, so the reticle ring only sits
+    // over the scenery and mottles it.
+    document.getElementById('hud').classList.add('no-reticle');
   }
   // Debug switches: ?hide=sea|clouds lets a probe isolate what a reviewer is seeing.
   const hide = new URLSearchParams(location.search).get('hide');
@@ -360,6 +363,7 @@ if (shot) {
     if (hide === 'terrain' && o.isMesh && o.geometry?.attributes?.color) o.visible = false;
   });
   if (pose.gate) course.solo(pose.gate);
+  if (pose.rings === false) course.root.visible = false;
   if (pose.hull) plane.hull = pose.hull;
   shotSmoke = Boolean(pose.smoke);
   for (const burst of pose.bursts ?? []) threat.place(burst.at, burst.size);
