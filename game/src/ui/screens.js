@@ -17,8 +17,10 @@ export function createScreens() {
       pause.classList.add('hidden');
       result.classList.add('hidden');
     },
+    // Pausing takes the instruments off the glass too: a stopped sortie should not look live.
     showPause(show) {
       pause.classList.toggle('hidden', !show);
+      document.getElementById('hud').classList.toggle('hidden-hud', show);
     },
     report({ completed, headline, detail, gates, seconds, hull, missions }) {
       document.getElementById('r-title').textContent = completed ? 'SORTIE COMPLETE' : 'SORTIE LOST';

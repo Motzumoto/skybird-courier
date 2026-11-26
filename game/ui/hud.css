@@ -330,3 +330,29 @@ html, body {
 @media (max-width: 640px) {
   .picks { grid-template-columns: 1fr; }
 }
+
+/* The pause card: darker than the rest of the screens, so being stopped reads as a state. */
+#pause {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 198, 112, 0.1), transparent 48%),
+    rgba(4, 10, 13, 0.94);
+}
+#pause .kicker {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(255, 214, 138, 0.72);
+}
+#pause h1 {
+  font-size: clamp(34px, 5vw, 64px);
+  color: #ffe6b4;
+}
+#pause .tag {
+  max-width: 420px;
+}
+#pause .foot {
+  margin-top: 6px;
+  color: rgba(246, 241, 226, 0.72);
+  letter-spacing: 0.2em;
+}
