@@ -69,6 +69,15 @@ export function createPlane(mesh, spawn) {
     qTemp.setFromAxisAngle(AXIS_Y, -plane.yaw * FLIGHT.yawRate * authority * dt);
     plane.quaternion.multiply(qTemp);
 
+    // Gusts off the ridges: low and rough, the wing gets nudged so a pass needs correcting.
+    const agl = plane.position.y - plane.groundHeight;
+    const rough = !plane.onGround && agl < FLIGHT.gustBelow ? (1 - agl / FLIGHT.gustBelow) * plane.speed * 0.006 : 0;
+    if (rough > 0.01) {
+      const gust = Math.sin(plane.distance * 0.037) + Math.sin(plane.distance * 0.011 + 1.7) * 0.6;
+      qTemp.setFromAxisAngle(AXIS_Z, gust * rough * dt);
+      plane.quaternion.multiply(qTemp);
+    }
+
     // Keep the airframe from hanging on its back.
     const localUp = AXIS_Y.clone().applyQuaternion(plane.quaternion);
     if (localUp.y < 0.05 && !plane.onGround) {

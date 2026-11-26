@@ -20,6 +20,7 @@ export const FLIGHT = {
   authority: 0.062,    // control authority per m/s of airspeed
   gravityBleed: 11.5,  // speed gained/lost with pitch
   stallSpeed: 33,
+  gustBelow: 110,       // metres above ground where the rock starts throwing the wing about
   flapDrag: 0.72,
   fuelBurn: 0.0052,    // per second at full throttle
   fuelBurnIdle: 0.0012,
