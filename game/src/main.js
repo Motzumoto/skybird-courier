@@ -6,6 +6,7 @@ import { createRenderer, buildSky, applyCameraSettings } from './render/scene.js
 import { createCameraRig } from './render/cameras.js';
 import { buildCockpit } from './render/cockpit.js';
 import { buildTerrain, animateSea, airstripPad } from './terrain/buildIslands.js';
+import { buildVegetation } from './terrain/vegetation.js';
 import { AIRSTRIPS, ISLANDS, groundAt } from './terrain/heightfield.js';
 import { buildPlane } from './aircraft/buildPlane.js';
 import { createPlane } from './aircraft/flightModel.js';
@@ -28,6 +29,7 @@ const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerH
 applyCameraSettings(camera);
 buildSky(scene);
 const terrain = buildTerrain(scene);
+buildVegetation(scene);
 const sea = terrain.children.find((child) => child.userData?.wave);
 const traffic = buildTraffic(scene);
 const threat = createThreat(scene);

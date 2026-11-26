@@ -60,16 +60,16 @@ export const SHOTS = {
   ridge: ({ course }) => {
     const gate = pickLowGate(course, 2) ?? null;
     if (!gate) return { kind: 'survey' };
-    const from = behindGate(gate, 720, 96);
+    const from = behindGate(gate, 520, 40);
     const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 16, 0)), { roll: 0.18, pitch: 0.03 });
     const bursts = [];
     const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(pose.quaternion);
     for (let i = 0; i < 4; i++) {
-      const near = pose.position.clone().addScaledVector(forward, 150 + i * 55);
+      const near = pose.position.clone().addScaledVector(forward, 230 + i * 70);
       const side = i % 2 === 0 ? 1 : -1;
-      near.x += side * (150 + i * 32);
-      near.y += 34 + (i % 4) * 42;
-      bursts.push({ at: near, size: 13 + (i % 3) * 5 });
+      near.x += side * (170 + i * 40);
+      near.y += 46 + (i % 4) * 46;
+      bursts.push({ at: near, size: 10 + (i % 3) * 4 });
     }
     const trail = [];
     for (let i = 0; i < 7; i++) {
@@ -78,7 +78,7 @@ export const SHOTS = {
       puff.y += 1.4 + i * 0.8;
       trail.push({ at: puff, size: 2.2 + i * 0.75 });
     }
-    return { ...pose, speed: 84, throttle: 0.95, camera: 'chase', kind: 'survey', gate, hull: 44, bursts, trail };
+    return { ...pose, speed: 84, throttle: 0.95, camera: 'cockpit', kind: 'survey', gate, hull: 44, bursts, trail };
   },
 
   // Windward cliffs: the courier on the coast run, sea and rock below the wing.
