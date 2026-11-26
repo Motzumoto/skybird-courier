@@ -101,10 +101,11 @@ export function createMission(kind) {
     done: course.passed + mission.zones.filter((zone) => zone.done).length + mission.drops.filter((drop) => drop.done).length,
     total: course.gates.length + mission.zones.length + mission.drops.length,
   });
-  // Every ring, every pass, every crate: only then is the finish strip live.
-  mission.ready = (course) => course.index >= course.gates.length
-    && mission.zones.every((zone) => zone.done)
-    && mission.drops.every((drop) => drop.done);
+  // Every ring, every pass, every crate: readiness is just the tally being full.
+  mission.ready = (course) => {
+    const { done, total } = mission.tally(course);
+    return done >= total;
+  };
   mission.strip = () => AIRSTRIPS.find((strip) => strip.name === brief.finish);
 
   // Where the wheels have to go: true when the aircraft is down, slow and on the finish strip.
