@@ -66,6 +66,7 @@ The logbook keeps your sorties and your best run.
   gate count, the bearing to the next ring and a navline, with a minimap of the islands beside it.
 - Flak blooms in puffs along the caldera approach and thins the airframe; damage trails smoke and
   bleeds power, and the HUD tapes creep down with it.
+- Crates go out the belly of the courier under pale canopies, so a village drop reads at a glance.
 - Birds over the channels and fishing boats in the shallows keep the archipelago moving.
 - The ground throws a gust at the wing when you fly low over the rock, so a pass has to be flown.
 
@@ -88,7 +89,7 @@ game/src/main.js         boot, loop, sortie rules
 game/src/input.js        keyboard state
 game/src/aircraft/       airframe mesh and the flight model
 game/src/terrain/        island heightfield and its meshes, airstrips, bridge, palms and hamlets
-game/src/render/         renderer, sky, sun, cameras, touchdown spray
+game/src/render/         renderer, sky, sun, cameras, touchdown spray, cargo chutes
 game/src/game/           gates, missions, birds and boats, ridge flak
 game/src/ui/             instruments, minimap, title, pause and sortie report
 game/src/audio/          synthesised engine, wind, chime, impact
