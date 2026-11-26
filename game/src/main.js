@@ -88,6 +88,7 @@ function begin() {
   audio.start();
   chosen = MISSION_KINDS[Math.floor(Math.random() * MISSION_KINDS.length)];
   screens.hideAll();
+  document.getElementById('hud').classList.add('shot-hud');
   mount(chosen);
   state = 'flying';
   hud.banner('CLEARED FOR THE RUN');
@@ -236,6 +237,7 @@ function frame() {
 function restart() {
   if (state === 'flying') return;
   screens.hideAll();
+  document.getElementById('hud').classList.add('shot-hud');
   mount(chosen);
   state = 'flying';
 }
@@ -278,6 +280,7 @@ window.addEventListener('resize', () => {
 const shot = shotName();
 if (shot) {
   screens.hideAll();
+  document.getElementById('hud').classList.add('shot-hud');
   const first = SHOTS[shot]({ course: null, strips: AIRSTRIPS });
   mount(first.kind);
   const pose = SHOTS[shot]({ course, strips: AIRSTRIPS });

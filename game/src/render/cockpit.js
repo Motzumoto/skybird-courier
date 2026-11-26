@@ -15,11 +15,11 @@ export function buildCockpit() {
   const shield = new THREE.Mesh(new THREE.BoxGeometry(1.06, 0.1, 0.34), trim);
   shield.position.set(0, -0.36, -0.66);
   shield.rotation.x = 0.24;
-  const dash = new THREE.Mesh(new THREE.BoxGeometry(1.02, 0.34, 0.3), shell);
-  dash.position.set(0, -0.6, -0.74);
+  const dash = new THREE.Mesh(new THREE.BoxGeometry(1.04, 0.27, 0.3), shell);
+  dash.position.set(0, -0.66, -0.75);
   dash.rotation.x = 0.36;
   const panel = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.19, 0.06), panelFluoro);
-  panel.position.set(0, -0.49, -0.6);
+  panel.position.set(0, -0.56, -0.61);
   panel.rotation.x = 0.5;
   group.add(shield, dash, panel);
 

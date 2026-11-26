@@ -231,3 +231,12 @@ html, body {
 .screen button:hover { background: #ffd68a; }
 .tally { display: flex; gap: 22px; font-size: 13px; color: var(--amber); }
 .tally b { display: block; font-size: 30px; }
+
+/* Screenshot poses: ease the furniture back so the world carries the frame. */
+#hud.shot-hud {
+  opacity: 0.82;
+}
+#hud.shot-hud .panel {
+  transform: scale(0.92);
+  transform-origin: top left;
+}
