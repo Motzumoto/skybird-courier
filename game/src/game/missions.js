@@ -5,7 +5,8 @@
 import { ISLANDS, AIRSTRIPS } from '../terrain/heightfield.js';
 
 // A brief, in full, in one place. Each entry says what the sortie asks for and how it is judged:
-//   count  objectives the panel tallies: the gates in `route` plus any zones or drops.
+//   count  the objectives the brief asks for, for the reader's sake: the route gates plus any
+//          zones or drops. The panel tally itself is derived by tally() so the two cannot drift.
 //   route  legs of the course: `from` and `to` are indexes into ISLANDS, `gates` is how many
 //          rings hang on that leg, so the route reads as "out to island 4 and back".
 //   zones  low passes to hold for `dwell` seconds inside `radius` of the island.
@@ -91,7 +92,16 @@ export function createMission(kind) {
     }
     return null;
   };
-  mission.needsLanding = () => mission.zones.every((zone) => zone.done) && mission.drops.every((drop) => drop.done);
+  // The one definition of where the sortie stands: the panel, the finish gate and the report all
+  // read this, so a mission can never tally one number and finish on another.
+  mission.tally = (course) => ({
+    done: course.passed + mission.zones.filter((zone) => zone.done).length + mission.drops.filter((drop) => drop.done).length,
+    total: course.gates.length + mission.zones.length + mission.drops.length,
+  });
+  // Every ring, every pass, every crate: only then is the finish strip live.
+  mission.ready = (course) => course.index >= course.gates.length
+    && mission.zones.every((zone) => zone.done)
+    && mission.drops.every((drop) => drop.done);
   mission.strip = () => AIRSTRIPS.find((strip) => strip.name === brief.finish);
 
   // Where the wheels have to go: true when the aircraft is down, slow and on the finish strip.

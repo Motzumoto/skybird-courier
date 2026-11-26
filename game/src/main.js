@@ -94,9 +94,8 @@ function mount(kind, pose) {
 }
 
 // Gates plus whatever else the brief asks for: the counter is the day's work, not just the rings.
-const objectivesDone = () => (mission?.drops ?? []).filter((drop) => drop.done).length;
-const objectiveCount = () => course.passed + objectivesDone();
-const objectiveTotal = () => course.gates.length + (mission?.drops?.length ?? 0);
+const objectivesDone = () => mission.tally(course).done;
+const objectiveTotal = () => mission.tally(course).total;
 
 function begin() {
   audio.start();
@@ -164,7 +163,7 @@ function updateThreat(dt) {
 
 // Everything the gate course is there for: finish the rings, then put it down where the lamp burns.
 function flyFinish() {
-  if (course.index < course.gates.length || !mission.needsLanding()) return false;
+  if (!mission.ready(course)) return false;
   hud.brief(`All passes flown. Put down on ${mission.brief.finish} strip, wing low, gear down.`);
   if (!checkLanding()) return false;
   audio.thud(0.7);
@@ -226,7 +225,7 @@ function frame() {
     if (state === 'flying') rules(dt);
     if (hud && time - lastHudPaint > 0.06) {
       lastHudPaint = time;
-      hud.refresh(plane, course, objectiveCount(), objectiveTotal());
+      hud.refresh(plane, course, objectivesDone(), objectiveTotal());
     }
   } else if (state === 'title') {
     const orbit = time * 0.06;
@@ -246,7 +245,7 @@ function frame() {
     plane.mesh.visible = rig.mode !== 'cockpit';
     if (hud && time - lastHudPaint > 0.06) {
       lastHudPaint = time;
-      hud.refresh(plane, course, objectiveCount(), objectiveTotal());
+      hud.refresh(plane, course, objectivesDone(), objectiveTotal());
     }
   }
 
