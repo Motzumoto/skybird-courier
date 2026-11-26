@@ -41,7 +41,7 @@ mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 | `G` | release the supply crates (supply-drop sortie) |
 | `C` | chase / cockpit camera |
 | `H` | hide the HUD |
-| `P` | pause · `R` restart |
+| `P` / `Esc` | pause · `Enter` resumes · `R` restart |
 
 ## Sorties
 
@@ -67,6 +67,7 @@ The logbook keeps your sorties and your best run.
 - Flak blooms in puffs along the caldera approach and thins the airframe; damage trails smoke and
   bleeds power, and the HUD tapes creep down with it.
 - Birds over the channels and fishing boats in the shallows keep the archipelago moving.
+- The ground throws a gust at the wing when you fly low over the rock, so a pass has to be flown.
 
 ## Screenshots
 
