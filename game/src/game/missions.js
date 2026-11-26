@@ -22,6 +22,14 @@ export const BRIEFS = {
     zones: [{ island: 2, radius: 300, dwell: 6 }],
     finish: 'Porto Sana',
   },
+  drop: {
+    name: 'Supply drop',
+    text: 'The hamlets on Vela Rock are cut off. Cross the ring low and slow over the village, drop the crates, then land at Porto Sana.',
+    count: 5,
+    route: [{ from: 0, to: 3, gates: 3 }, { from: 3, to: 0, gates: 2 }],
+    drop: { island: 3, radius: 240, slow: 62, low: 150 },
+    finish: 'Porto Sana',
+  },
   medevac: {
     name: 'Medevac',
     text: 'A climber is down on Serra Alta. Get there, fly the gate on the ridge, and put down on Ilheu do Sino strip without bending the floats.',
@@ -38,6 +46,7 @@ export function createMission(kind) {
     brief,
     dwell: 0,
     zones: (brief.zones ?? []).map((zone) => ({ ...zone, done: false, time: 0 })),
+    drops: (brief.drop ? [{ ...brief.drop, done: false, armed: false }] : []),
     finished: false,
     failed: false,
     landing: null,
@@ -57,7 +66,23 @@ export function createMission(kind) {
       }
     }
   };
-  mission.needsLanding = () => mission.zones.every((zone) => zone.done);
+  // A drop needs the ring taken low and slow: fast and the crates burst, high and they miss.
+  mission.dropCrates = () => {
+    for (const drop of mission.drops) {
+      if (drop.done) continue;
+      const island = ISLANDS[drop.island];
+      const over = Math.hypot(plane.position.x - island.x, plane.position.z - island.z) < drop.radius;
+      const low = plane.position.y - plane.groundHeight < drop.low;
+      if (over && low && plane.speed < drop.slow) {
+        drop.done = true;
+        return 'released';
+      }
+      if (over && low) return 'too fast';
+      if (over && !low) return 'too high';
+    }
+    return null;
+  };
+  mission.needsLanding = () => mission.zones.every((zone) => zone.done) && mission.drops.every((drop) => drop.done);
   mission.strip = () => AIRSTRIPS.find((strip) => strip.name === brief.finish);
   return mission;
 }

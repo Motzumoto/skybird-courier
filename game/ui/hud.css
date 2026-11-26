@@ -248,3 +248,63 @@ html, body {
 .gauge.speed u.on {
   opacity: 1;
 }
+
+/* Sortie picker on the title card. */
+.pick-label {
+  margin: 1.6rem 0 0.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #c9b79a;
+}
+.picks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  max-width: 44rem;
+  margin: 0 auto 1.4rem;
+}
+.screen .pick {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  margin-top: 0;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  color: #efe3cd;
+  background: rgba(9, 11, 13, 0.9);
+  border: 1px solid rgba(240, 214, 165, 0.28);
+  border-radius: 7px;
+  font: inherit;
+  cursor: pointer;
+}
+.screen .pick b {
+  font-size: 0.82rem;
+  letter-spacing: 0.09em;
+  color: #f2e6cd;
+  text-transform: uppercase;
+}
+.screen .pick span {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: #f0e2ca;
+}
+.screen .pick:hover,
+.screen .pick:focus-visible {
+  border-color: rgba(255, 226, 168, 0.7);
+}
+.screen .pick.on {
+  border-color: #ffd88a;
+  background: rgba(72, 54, 26, 0.92);
+  box-shadow: 0 0 0 2px #ffd88a inset, 0 8px 26px rgba(0, 0, 0, 0.5);
+}
+.screen .pick.on b {
+  color: #ffe6b4;
+}
+.screen .pick.on span {
+  color: #e6d3b6;
+}
+@media (max-width: 640px) {
+  .picks { grid-template-columns: 1fr; }
+}

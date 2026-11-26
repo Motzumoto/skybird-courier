@@ -3,7 +3,7 @@
 const DOWN = new Set();
 const TRACKED = new Set([
   'KeyW', 'KeyS', 'KeyA', 'KeyD', 'KeyQ', 'KeyE', 'ShiftLeft', 'ShiftRight',
-  'ControlLeft', 'ControlRight', 'KeyC', 'KeyF', 'KeyP', 'KeyR', 'KeyH', 'Space',
+  'ControlLeft', 'ControlRight', 'KeyC', 'KeyF', 'KeyP', 'KeyR', 'KeyH', 'KeyG', 'Space',
 ]);
 
 export function bindInput(handlers) {
@@ -16,6 +16,7 @@ export function bindInput(handlers) {
     if (event.code === 'KeyR') handlers.restart?.();
     if (event.code === 'KeyH') handlers.hud?.();
     if (event.code === 'KeyF') handlers.flaps?.();
+    if (event.code === 'KeyG') handlers.drop?.();
   });
   window.addEventListener('keyup', (event) => DOWN.delete(event.code));
   window.addEventListener('blur', () => DOWN.clear());

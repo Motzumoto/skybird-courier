@@ -39,7 +39,7 @@ export const PLAY = {
   lodFar: 3400,
 };
 
-export const MISSION_KINDS = ['courier', 'survey', 'medevac'];
+export const MISSION_KINDS = ['courier', 'survey', 'drop', 'medevac'];
 
 export const CAMERA = {
   chaseBack: 17,

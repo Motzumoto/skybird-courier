@@ -164,6 +164,13 @@ function rules(dt) {
     }
   }
 
+  const drop = mission.drops?.find((entry) => !entry.done);
+  if (drop) {
+    const island = ISLANDS[drop.island];
+    const distance = Math.hypot(plane.position.x - island.x, plane.position.z - island.z);
+    if (distance < drop.radius * 1.5) hud.text.textContent = 'Over the village: slow under 120 kt, low, then G to release.';
+  }
+
   const flakDamage = threat.update(dt, plane, mission.kind === 'survey' && course.index > 1);
   if (flakDamage > 0) {
     damage.apply(flakDamage, 'The flak found the engine.');
@@ -265,12 +272,30 @@ bindInput({
   restart: () => {
     if (state === 'over') restart();
   },
+  drop: () => {
+    if (state !== 'flying' || !mission?.drops?.length) return;
+    const result = mission.dropCrates();
+    if (!result) return;
+    if (result === 'released') {
+      mission.dwell += 1;
+      hud.banner('CRATES AWAY');
+    } else {
+      hud.banner(result === 'too fast' ? 'TOO FAST TO DROP' : 'TOO HIGH TO DROP');
+    }
+  },
   hud: () => hud?.toggle(),
   flaps: () => {
     if (plane) plane.flaps = plane.flaps > 0.5 ? 0 : 1;
   },
 });
 
+for (const button of document.querySelectorAll('.pick')) {
+  button.addEventListener('click', () => {
+    chosen = button.dataset.kind;
+    for (const other of document.querySelectorAll('.pick')) other.classList.toggle('on', other === button);
+  });
+}
+document.querySelector(`.pick[data-kind="${chosen}"]`)?.classList.add('on');
 document.getElementById('start').addEventListener('click', begin);
 document.getElementById('resume').addEventListener('click', () => {
   state = 'flying';

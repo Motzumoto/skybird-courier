@@ -37,7 +37,7 @@ mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 | `A` / `D` | roll left / right |
 | `Q` / `E` | rudder |
 | `Shift` / `Ctrl` | throttle up / down |
-| `F` | flaps |
+| `F` | flaps · `G` releases the supply crates |
 | `C` | chase / cockpit camera |
 | `H` | hide the HUD |
 | `P` | pause · `R` restart |
@@ -46,6 +46,7 @@ mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
 - **Mail run** — carry the satchel across the channel, take every gate, land under the lamp.
 - **Caldera survey** — hold a low pass below 90 m over the rim of Caldeira Preta, twice, and come home.
+- **Supply drop** — cross the ring low and slow over a cut-off hamlet and put the crates on the village.
 - **Medevac** — reach the climber on Serra Alta, fly the ridge gate, set the floats down gently.
 
 Stall it and the nose drops; land hard and the floats fold; run the tanks dry and the engine quits.
