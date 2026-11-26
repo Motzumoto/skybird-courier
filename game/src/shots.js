@@ -36,13 +36,13 @@ export const SHOTS = {
   cover: ({ course }) => {
     const gate = course?.gates[1] ?? course?.gates[0] ?? null;
     if (!gate) return { kind: 'courier' };
-    const from = behindGate(gate, 300, 52);
+    const from = behindGate(gate, 210, 44);
     // Slide the camera off the gate axis so the ring and the aircraft do not sit on top of
     // each other, and the shot reads as a diagonal composition.
     const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(gate.ring.quaternion);
     from.addScaledVector(new THREE.Vector3(normal.z, 0, -normal.x).normalize(), 22);
     const side = new THREE.Vector3(normal.z, 0, -normal.x).normalize();
-    const look = gate.position.clone().add(new THREE.Vector3(0, 26, 0)).addScaledVector(side, -26);
+    const look = gate.position.clone().add(new THREE.Vector3(0, 26, 0)).addScaledVector(side, -78);
     const pose = aim(from, look, { roll: -0.1, pitch: 0.02 });
     return { ...pose, speed: 79, throttle: 0.83, camera: 'chase', kind: 'courier', gate };
   },
