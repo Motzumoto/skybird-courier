@@ -120,7 +120,7 @@ export function buildSky(scene) {
   scene.add(new THREE.HemisphereLight('#cfe2ee', '#6a6150', 1.5));
   scene.add(new THREE.AmbientLight('#9db6c4', 0.6));
 
-  const disc = sunSprite('rgba(255,246,222,0.98)', 'rgba(255,214,150,0)', 940);
+  const disc = sunSprite("rgba(255,246,222,0.98)", "rgba(255,214,150,0)", 640);
   disc.position.copy(sun.position).multiplyScalar(1.6);
   scene.add(disc);
 
@@ -156,7 +156,7 @@ export function buildSky(scene) {
   glitterTex.colorSpace = THREE.SRGBColorSpace;
   const glitter = new THREE.Mesh(
     new THREE.PlaneGeometry(430, 5400),
-    new THREE.MeshBasicMaterial({ map: glitterTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.26, fog: true })
+    new THREE.MeshBasicMaterial({ map: glitterTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.2, fog: true })
   );
   const azimuth = Math.atan2(sun.position.x, sun.position.z);
   glitter.rotation.set(-Math.PI / 2, 0, 0);

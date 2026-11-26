@@ -67,7 +67,7 @@ export const SHOTS = {
     const gate = pickLowGate(course, 2) ?? null;
     if (!gate) return { kind: 'survey' };
     const from = behindGate(gate, 520, 40);
-    const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 16, 0)), { roll: 0.18, pitch: 0.03 });
+    const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 10, 0)), { roll: 0.18, pitch: 0.06 });
     const bursts = [];
     const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(pose.quaternion);
     for (let i = 0; i < 4; i++) {
@@ -104,18 +104,30 @@ export const SHOTS = {
 };
 
 // The gate lowest over the water: the one that frames sea behind the wing on the caldera run.
+// The gate lowest over the water AND off the sun's bearing, so the sun sits out at the edge
+// of the frame instead of clipping into it: the one that frames sea behind the wing.
+const SUN_BEARING = Math.atan2(1.92, -1.52);
+
 function pickLowGate(course, from) {
   if (!course) return null;
   let best = null;
   let bestHeight = Infinity;
+  let fallback = null;
+  let fallbackHeight = Infinity;
   for (const gate of course.gates.slice(from)) {
     const height = groundAt(gate.position.x, gate.position.z);
+    const away = Math.cos(Math.atan2(gate.position.x, gate.position.z) - SUN_BEARING);
+    if (height < fallbackHeight) {
+      fallbackHeight = height;
+      fallback = gate;
+    }
+    if (Math.abs(away) > 0.45) continue;
     if (height < bestHeight) {
       bestHeight = height;
       best = gate;
     }
   }
-  return best;
+  return best ?? fallback;
 }
 
 // The gate with the most room around it, so no second ring crops into the frame.

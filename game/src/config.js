@@ -7,7 +7,7 @@ export const WORLD = {
   maxHeight: 620,
   fogNear: 1500,
   fogFar: 9600,
-  sunElevation: 0.19,  // golden hour
+  sunElevation: 0.075, // last light, sun hard on the water
 };
 
 export const FLIGHT = {
