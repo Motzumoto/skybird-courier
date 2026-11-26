@@ -367,6 +367,7 @@ if (shot) {
   if (pose.hull) plane.hull = pose.hull;
   shotSmoke = Boolean(pose.smoke);
   for (const burst of pose.bursts ?? []) threat.place(burst.at, burst.size);
+  for (const flash of pose.flashes ?? []) threat.flash(flash.at, flash.size);
   for (const puff of pose.trail ?? []) damage?.place(puff.at, puff.size);
   rig.update(plane, 0.016, 0.5, true);
   state = 'shot';
