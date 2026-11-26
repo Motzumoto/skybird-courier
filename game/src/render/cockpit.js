@@ -54,6 +54,33 @@ export function buildCockpit() {
   header.position.set(0, 0.6, -0.34);
   group.add(header);
 
+  // The magnetic compass on the glare shield, and the yoke in front of the pilot.
+  const compassBody = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.055, 0.05, 14), trim);
+  compassBody.position.set(0, -0.31, -0.6);
+  compassBody.rotation.x = Math.PI / 2 - 0.24;
+  const compassCard = new THREE.Mesh(new THREE.CircleGeometry(0.038, 16), new THREE.MeshBasicMaterial({ color: '#efe3c9' }));
+  compassCard.position.set(0, -0.295, -0.575);
+  compassCard.rotation.x = -0.24;
+  const compassNeedle = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.05, 0.001), new THREE.MeshBasicMaterial({ color: '#b8392f' }));
+  compassNeedle.position.set(0, -0.295, -0.573);
+  compassNeedle.rotation.x = -0.24;
+  compassNeedle.rotation.z = 0.6;
+  group.add(compassBody, compassCard, compassNeedle);
+
+  const yokeColumn = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.03, 0.34, 10), trim);
+  yokeColumn.position.set(0, -0.44, -0.6);
+  yokeColumn.rotation.x = -0.22;
+  const yokeMetal = new THREE.MeshStandardMaterial({ color: '#9aa4a9', roughness: 0.5, metalness: 0.3, emissive: '#2f393d', emissiveIntensity: 0.8 });
+  const yokeBar = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.05, 0.05), yokeMetal);
+  yokeBar.position.set(0, -0.27, -0.6);
+  yokeBar.rotation.x = -0.12;
+  for (const side of [-1, 1]) {
+    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.032, 0.18, 10), yokeMetal);
+    grip.position.set(side * 0.22, -0.2, -0.6);
+    group.add(grip);
+  }
+  group.add(yokeColumn, yokeBar);
+
   // Panel glow so the cockpit is the brightest thing at dusk.
   const glow = new THREE.PointLight('#ffb469', 3.2, 3, 2);
   glow.position.set(0, -0.42, -0.62);

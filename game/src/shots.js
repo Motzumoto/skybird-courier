@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { AIRSTRIPS } from './terrain/heightfield.js';
 import { airstripPad } from './terrain/buildIslands.js';
 import { groundAt } from './terrain/heightfield.js';
+import { BRIDGE } from './terrain/buildBridge.js';
 
 const BACK = new THREE.Vector3(0, 0, 1);
 const UP = new THREE.Vector3(0, 1, 0);
@@ -91,6 +92,29 @@ export const SHOTS = {
       trail.push({ at: puff, size: 2.2 + i * 0.75 });
     }
     return { ...pose, speed: 84, throttle: 0.95, camera: 'cockpit', kind: 'survey', gate, hull: 44, bursts, trail };
+  },
+
+  // The strait: over the span with a course gate hanging past it, so the landmark and the
+  // objective sit in one frame.
+  strait: ({ course }) => {
+    if (!BRIDGE.midpoint) return { kind: 'courier' };
+    const axis = BRIDGE.axis.clone();
+    const across = new THREE.Vector3(axis.z, 0, -axis.x).normalize();
+    let gate = null;
+    let best = Infinity;
+    for (const candidate of course?.gates ?? []) {
+      const away = candidate.position.distanceTo(BRIDGE.midpoint);
+      if (away < best) {
+        best = away;
+        gate = candidate;
+      }
+    }
+    const from = BRIDGE.midpoint.clone().addScaledVector(axis, 480).addScaledVector(across, 12);
+    from.y = BRIDGE.midpoint.y + 40;
+    const to = BRIDGE.midpoint.clone().addScaledVector(axis, -430).addScaledVector(across, -10);
+    to.y = BRIDGE.midpoint.y + 22;
+    const pose = aim(from, to, { roll: 0.07, pitch: -0.04 });
+    return { ...pose, speed: 84, throttle: 0.95, camera: 'chase', kind: 'courier', gate };
   },
 
   // Windward cliffs: the courier on the coast run, sea and rock below the wing.

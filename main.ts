@@ -8,7 +8,7 @@
 //   3. write dossier.json with the kit's buildDossier, under the scorer's own caps.
 // MAKEFUN_OUTPUT_DIR stands in for the grader's /output when run by hand.
 
-import { cpSync, existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-game.ts';
@@ -31,6 +31,7 @@ if (screens.length < 3 || screens.length > 4) {
 
 mkdirSync(out, { recursive: true });
 cpSync(gameDir, join(out, 'game'), { recursive: true });
+rmSync(join(out, 'screenshots'), { recursive: true, force: true });
 mkdirSync(join(out, 'screenshots'), { recursive: true });
 cpSync(screensDir, join(out, 'screenshots'), { recursive: true });
 

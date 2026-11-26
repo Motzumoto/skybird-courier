@@ -13,7 +13,8 @@ const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '
 const GAME = join(ROOT, 'game');
 // The four hand-in images live in screenshots/; a one-off rerun goes to shots/ so it never
 // leaves a stray beside the deliverable.
-const OUT = process.argv.length > 2 ? join(ROOT, 'shots') : join(ROOT, 'screenshots');
+const ALL = process.argv[2] === undefined;
+const OUT = ALL ? join(ROOT, 'screenshots') : join(ROOT, 'shots');
 const PORT = 8231;
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.jpg': 'image/jpeg', '.png': 'image/png' };
@@ -31,7 +32,7 @@ const server = createServer(async (req, res) => {
 });
 
 const names = process.argv.slice(2);
-const shots = names.length ? names : ['cover', 'approach', 'ridge', 'cliffs'];
+const shots = names.length ? names : ['cover', 'strait', 'approach', 'ridge'];
 
 await mkdir(OUT, { recursive: true });
 await new Promise((resolve, reject) => { server.once('error', reject); server.listen(PORT, '127.0.0.1', resolve); });
@@ -48,7 +49,7 @@ let index = 1;
 for (const name of shots) {
   await page.goto(`http://127.0.0.1:${PORT}/?shot=${name}`, { waitUntil: 'load' });
   await page.waitForTimeout(2600);
-  const file = join(OUT, process.argv.length > 2 ? `${name}.jpg` : `${index}-${name}.jpg`);
+  const file = join(OUT, ALL ? `${index}-${name}.jpg` : `${name}.jpg`);
   await page.screenshot({ path: file, type: 'jpeg', quality: 88 });
   console.log('wrote', file);
   index += 1;

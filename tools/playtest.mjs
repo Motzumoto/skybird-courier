@@ -37,11 +37,11 @@ await page.screenshot({ path: 'shots/debug-flight-start.jpg', type: 'jpeg', qual
 
 const before = await page.evaluate(() => ({ z: window.__game.plane.position.z, speed: window.__game.plane.speed }));
 await page.keyboard.press('Period');
-// fly level-ish: tap pitch down in short pulses, then hold throttle up
+// fly level-ish: tap pitch up in short pulses, then hold throttle up
 for (let i = 0; i < 9; i++) {
-  await page.keyboard.down('KeyW');
+  await page.keyboard.down('KeyS');
   await page.waitForTimeout(220);
-  await page.keyboard.up('KeyW');
+  await page.keyboard.up('KeyS');
   await page.waitForTimeout(780);
 }
 await page.keyboard.down('Period');
