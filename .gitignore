@@ -2,3 +2,4 @@ out/
 
 node_modules/
 tools/playwright-core/
+shots/
