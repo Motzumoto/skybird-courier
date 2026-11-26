@@ -49,7 +49,7 @@ html, body {
   content: "";
   position: absolute;
   background: var(--amber);
-  box-shadow: 0 0 6px rgba(255, 195, 92, 0.6);
+  box-shadow: 0 0 0 1px rgba(10, 12, 14, 0.5), 0 0 6px rgba(255, 195, 92, 0.6);
 }
 .pit-horizon::before { left: 0; top: 118px; width: 130px; height: 3px; }
 .pit-horizon::after { right: 0; top: 118px; width: 130px; height: 3px; }
@@ -62,7 +62,7 @@ html, body {
   margin-left: -11px;
   border: 2px solid var(--amber);
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(255, 195, 92, 0.7);
+  box-shadow: 0 0 0 1px rgba(10, 12, 14, 0.68), 0 0 8px rgba(255, 195, 92, 0.7);
 }
 .pit-horizon span::after {
   content: "";
@@ -234,7 +234,29 @@ html, body {
 
 /* Screenshot poses: ease the furniture back so the world carries the frame. */
 #hud.shot-hud {
-  opacity: 0.82;
+  opacity: 0.74;
+}
+/* The gate rings already give the aiming shape, so the reticle steps back in a still frame. */
+#hud.shot-hud .pit-horizon {
+  opacity: 0.34;
+}
+/* Keep the numbers hot while the panels stay translucent. */
+#hud.shot-hud .gauge b {
+  color: #ffe6b0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+}
+#hud.shot-hud .mission p {
+  color: rgba(250, 245, 232, 0.94);
+  font-size: 13px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+}
+#hud.shot-hud .mission h2,
+#hud.shot-hud .gauge i {
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+}
+#hud.shot-hud .gauge,
+#hud.shot-hud .mission {
+  background: rgba(10, 13, 15, 0.34);
 }
 #hud.shot-hud .panel {
   transform: scale(0.92);
