@@ -1,5 +1,6 @@
-// The day's work: three kinds of sortie over the Armada Isles, each with its own brief and
-// its own way of failing. The mission only counts objectives; main.js flies it.
+// The day's work: four kinds of sortie over the Armada Isles, each with its own brief and
+// its own way of failing, from a first gate-check to the run that wants the crates on the village.
+// A mission only counts objectives; main.js flies the sortie and the gates do the routing.
 
 import { ISLANDS, AIRSTRIPS } from '../terrain/heightfield.js';
 

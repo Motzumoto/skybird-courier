@@ -7,7 +7,7 @@
 **Skybird Courier** — an open-world-ish bush-flying game over the Armada Isles, a small volcanic
 archipelago of its own. You fly a floatplane courier for the island mail: gate to gate across the
 channels, over the caldera rim under flak, then down onto a lamp-lit strip before the light goes.
-Keyboard and mouse, three sortie types, fuel and airframe damage, a working instrument panel with a
+Keyboard and mouse, four sortie types you pick yourself, fuel and airframe damage, a working panel with a
 minimap, day-one save of your logbook, all in the browser with no build step and no network.
 
 The game is `game/` and opens from `game/index.html`. Everything it draws is its own: the islands,
@@ -83,10 +83,10 @@ game/src/config.js       every tuning number
 game/src/main.js         boot, loop, sortie rules
 game/src/input.js        keyboard state
 game/src/aircraft/       airframe mesh and the flight model
-game/src/terrain/        island heightfield and its meshes, airstrips, lamps
+game/src/terrain/        island heightfield and its meshes, airstrips, bridge, palms and hamlets
 game/src/render/         renderer, sky, sun, cameras
 game/src/game/           gates, missions, birds and boats, ridge flak
-game/src/ui/             instruments, minimap, screens
+game/src/ui/             instruments, minimap, title, pause and sortie report
 game/src/audio/          synthesised engine, wind, chime, impact
 game/src/save/           logbook in local storage
 game/src/shots.js        the four screenshot poses
