@@ -51,6 +51,28 @@ mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 Stall it and the nose drops; land hard and the floats fold; run the tanks dry and the engine quits.
 The logbook keeps your sorties and your best run.
 
+## What is in the world
+
+- A seeded heightfield builds six islands — jungle shelves, basalt cliffs, a breached caldera — and
+  carves two levelled airstrips into the ground with threshold masts, edge lamps, PAPI bars, a tower,
+  hangars and a windsock, so a landing is a lit target rather than a flat plate.
+- Palm groves and tin-roofed fishing hamlets are scattered on the low ground and drawn as two
+  instanced meshes; lighthouses stand on the outer rocks and sweep their beams over the water.
+- Golden-hour sky with a long warm horizon, a sun glitter path on the sea, cloud banks over the
+  caldera, fog and a lens streak; the sea itself is a wave-displaced surface.
+- Gate courses are seeded per sortie and only the next gate is lit; the mission panel carries the
+  gate count, the bearing to the next ring and a navline, with a minimap of the islands beside it.
+- Flak blooms in puffs along the caldera approach and thins the airframe; damage trails smoke and
+  bleeds power, and the HUD tapes creep down with it.
+- Birds over the channels and fishing boats in the shallows keep the archipelago moving.
+
+## Screenshots
+
+The four images are not hand-placed: `game/src/shots.js` flies the game's own course to a gate or a
+runway and poses the camera there, and `tools/shoot.mjs` renders each pose in headless Chromium at
+1280x720, so the shots come out of the shipping code. `tools/playtest.mjs` is a headless play-through
+that flies a sortie with real key events and reports the state and any console errors.
+
 ## Layout
 
 ```
