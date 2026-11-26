@@ -11,7 +11,9 @@ const { chromium } = require('./playwright-core');
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const GAME = join(ROOT, 'game');
-const OUT = join(ROOT, 'screenshots');
+// The four hand-in images live in screenshots/; a one-off rerun goes to shots/ so it never
+// leaves a stray beside the deliverable.
+const OUT = process.argv.length > 2 ? join(ROOT, 'shots') : join(ROOT, 'screenshots');
 const PORT = 8231;
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.jpg': 'image/jpeg', '.png': 'image/png' };
@@ -46,7 +48,7 @@ let index = 1;
 for (const name of shots) {
   await page.goto(`http://127.0.0.1:${PORT}/?shot=${name}`, { waitUntil: 'load' });
   await page.waitForTimeout(2600);
-  const file = join(OUT, `${index}-${name}.jpg`);
+  const file = join(OUT, process.argv.length > 2 ? `${name}.jpg` : `${index}-${name}.jpg`);
   await page.screenshot({ path: file, type: 'jpeg', quality: 88 });
   console.log('wrote', file);
   index += 1;

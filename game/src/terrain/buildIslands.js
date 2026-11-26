@@ -7,13 +7,13 @@ import { groundAt, ISLANDS, AIRSTRIPS, fbm, noise } from './heightfield.js';
 const SAND = new THREE.Color('#c6b089');
 const WET = new THREE.Color('#7d7158');
 const SHOAL = new THREE.Color('#12495a');
-const MOSS = new THREE.Color('#5c6f3c');
-const JUNGLE = new THREE.Color('#334c2f');
+const MOSS = new THREE.Color('#71854a');
+const JUNGLE = new THREE.Color('#4a6639');
 const BASALT = new THREE.Color('#3a3733');
 const ASH = new THREE.Color('#574c44');
 const EMBER = new THREE.Color('#7a4126');
 
-function groundColor(height, slope, volcanic) {
+function groundColor(height, slope, volcanic, x, z) {
   const c = new THREE.Color();
   if (height < 1.3) c.copy(SHOAL).lerp(WET, THREE.MathUtils.clamp(height / 1.3, 0, 1) * 0.8);
   else if (height < 6) c.copy(WET).lerp(SAND, (height - 1.3) / 4.7);
@@ -23,7 +23,13 @@ function groundColor(height, slope, volcanic) {
   else c.copy(JUNGLE).lerp(BASALT, Math.min(1, (height - 200) / 300));
   if (volcanic && height > 430) c.lerp(EMBER, (height - 430) / 240);
   c.lerp(BASALT, Math.min(0.85, slope * 2.1));
-  const grain = 0.88 + noise(height * 0.7, height * 1.3) * 0.24;
+  // Rock breaking through the slope, and scrub mottling the gentle ground: two scales of mark,
+  // so a face carries speckle and erosion rather than one flat tone.
+  if (slope > 0.34) c.lerp(ROCK, Math.min(0.7, (slope - 0.34) * 1.3) * (0.4 + noise(x * 0.06, z * 0.06) * 0.7));
+  if (height > 8 && height < 190 && slope < 0.4) {
+    c.lerp(JUNGLE, 0.22 + noise(x * 0.045, z * 0.045) * 0.38);
+  }
+  const grain = 0.93 + noise(x * 0.05, z * 0.05) * 0.1 + noise(x * 0.23, z * 0.23) * 0.09;
   return c.multiplyScalar(grain);
 }
 
@@ -45,7 +51,7 @@ export function buildTerrain(scene) {
     const dz = groundAt(x, z + 12) - groundAt(x, z - 12);
     const slope = Math.min(1, Math.hypot(dx, dz) / 34);
     const volcanic = Math.hypot(x - 1180, z + 240) < 900;
-    const c = groundColor(h, slope, volcanic);
+    const c = groundColor(h, slope, volcanic, x, z);
     colors[i * 3] = c.r;
     colors[i * 3 + 1] = c.g;
     colors[i * 3 + 2] = c.b;
@@ -67,7 +73,7 @@ export function buildTerrain(scene) {
 }
 
 function buildSea() {
-  const geo = new THREE.PlaneGeometry(WORLD.size * 3, WORLD.size * 3, 110, 110);
+  const geo = new THREE.PlaneGeometry(WORLD.size * 3, WORLD.size * 3, 190, 190);
   geo.rotateX(-Math.PI / 2);
   const material = new THREE.MeshStandardMaterial({
     color: '#2f8798',

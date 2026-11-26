@@ -3,7 +3,7 @@
 export const WORLD = {
   size: 5200,          // metres across the archipelago
   seaLevel: 0,
-  grid: 320,           // heightfield resolution per side
+  grid: 400,           // heightfield resolution per side
   maxHeight: 620,
   fogNear: 1500,
   fogFar: 9600,
