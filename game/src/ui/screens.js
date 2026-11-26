@@ -28,15 +28,16 @@ export function createScreens() {
       const tally = document.getElementById('r-tally');
       tally.innerHTML = '';
       const cells = [
-        ['GATES', `${gates}/${missions}`],
-        ['TIME', `${Math.round(seconds)}s`],
-        ['AIRFRAME', `${Math.max(0, Math.round(hull))}%`],
+        ['OBJECTIVES', `${gates}/${missions}`],
+        ['ELAPSED', `${seconds < 60 ? seconds.toFixed(1) : `${Math.round(seconds)}`}s`],
+        ['WING LEFT', `${Math.max(0, Math.round(hull))}%`],
       ];
       for (const [label, value] of cells) {
         const cell = document.createElement('span');
         cell.innerHTML = `<b>${value}</b>${label}`;
         tally.append(cell);
       }
+      document.getElementById('hud').classList.add('hidden-hud');
       result.classList.remove('hidden');
     },
   };
