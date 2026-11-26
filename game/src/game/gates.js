@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { PLAY } from '../config.js';
 import { groundAt, ISLANDS } from '../terrain/heightfield.js';
 
-const RING_GEO = new THREE.TorusGeometry(PLAY.ringRadius, 2.2, 8, 36);
+const RING_GEO = new THREE.TorusGeometry(PLAY.ringRadius, 2.6, 8, 40);
 const RING_MAT = new THREE.MeshStandardMaterial({
   color: '#ffcf7a',
   emissive: '#ffa53c',
@@ -15,8 +15,8 @@ const RING_MAT = new THREE.MeshStandardMaterial({
 });
 const NEXT_MAT = new THREE.MeshStandardMaterial({
   color: '#fff4d6',
-  emissive: '#ffe6ae',
-  emissiveIntensity: 3.4,
+  emissive: '#ffe9ba',
+  emissiveIntensity: 5.2,
   roughness: 0.3,
 });
 
