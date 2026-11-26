@@ -19,9 +19,15 @@ function aim(from, target, { roll = 0, pitch = 0 }) {
   return { position: from, quaternion };
 }
 
+// Behind the gate, on whichever side runs downhill (out to sea where there is sea): a plane
+// against open water reads, one pinned against a cliff face does not.
 function behindGate(gate, back, up) {
   const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(gate.ring.quaternion);
-  return gate.position.clone().addScaledVector(normal, -back).add(new THREE.Vector3(0, up, 0));
+  const forwardSpot = gate.position.clone().addScaledVector(normal, back);
+  const backSpot = gate.position.clone().addScaledVector(normal, -back);
+  const spot = groundAt(forwardSpot.x, forwardSpot.z) < groundAt(backSpot.x, backSpot.z) ? forwardSpot : backSpot;
+  spot.y = gate.position.y + up;
+  return spot;
 }
 
 export const SHOTS = {
@@ -54,9 +60,25 @@ export const SHOTS = {
   ridge: ({ course }) => {
     const gate = pickLowGate(course, 2) ?? null;
     if (!gate) return { kind: 'survey' };
-    const from = behindGate(gate, 420, 128);
+    const from = behindGate(gate, 720, 96);
     const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 16, 0)), { roll: 0.18, pitch: 0.03 });
-    return { ...pose, speed: 84, throttle: 0.95, camera: 'chase', kind: 'survey', gate };
+    const bursts = [];
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(pose.quaternion);
+    for (let i = 0; i < 4; i++) {
+      const near = pose.position.clone().addScaledVector(forward, 150 + i * 55);
+      const side = i % 2 === 0 ? 1 : -1;
+      near.x += side * (150 + i * 32);
+      near.y += 34 + (i % 4) * 42;
+      bursts.push({ at: near, size: 13 + (i % 3) * 5 });
+    }
+    const trail = [];
+    for (let i = 0; i < 7; i++) {
+      const puff = pose.position.clone().addScaledVector(forward, -(7 + i * 8));
+      puff.x += 5.5 + i * 0.7;
+      puff.y += 1.4 + i * 0.8;
+      trail.push({ at: puff, size: 2.2 + i * 0.75 });
+    }
+    return { ...pose, speed: 84, throttle: 0.95, camera: 'chase', kind: 'survey', gate, hull: 44, bursts, trail };
   },
 
   // Windward cliffs: the courier on the coast run, sea and rock below the wing.

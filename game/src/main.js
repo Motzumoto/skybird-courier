@@ -13,6 +13,7 @@ import { buildCourse } from './game/gates.js';
 import { createMission } from './game/missions.js';
 import { buildTraffic } from './game/traffic.js';
 import { createThreat } from './game/threat.js';
+import { createDamage } from './aircraft/damage.js';
 import { createHud } from './ui/hud.js';
 import { createScreens } from './ui/screens.js';
 import { createAudio } from './audio/engineSound.js';
@@ -30,6 +31,7 @@ const terrain = buildTerrain(scene);
 const sea = terrain.children.find((child) => child.userData?.wave);
 const traffic = buildTraffic(scene);
 const threat = createThreat(scene);
+let damage = null;
 const rig = createCameraRig(camera);
 const cockpit = buildCockpit();
 scene.add(camera);
@@ -47,6 +49,7 @@ let elapsed = 0;
 let chosen = MISSION_KINDS[Math.floor(Math.random() * MISSION_KINDS.length)];
 let ringCountdown = 0;
 let lastHudPaint = 0;
+let shotSmoke = false;
 
 const spawnPose = (() => {
   const strip = AIRSTRIPS[0];
@@ -69,6 +72,9 @@ function mount(kind, pose) {
   const mesh = buildPlane();
   scene.add(mesh);
   plane = createPlane(mesh, pose ?? spawnPose);
+  plane.cargo = kind === 'courier' ? 0.92 : kind === 'survey' ? 1 : 1.06;
+  damage?.clear();
+  damage = createDamage(plane, scene);
   if (pose?.speed) plane.speed = pose.speed;
   if (pose?.throttle !== undefined) plane.setThrottle(pose.throttle);
   rig.mode = pose?.camera ?? 'chase';
@@ -109,7 +115,10 @@ function checkLanding() {
   const along = dx * Math.sin(strip.heading) + dz * Math.cos(strip.heading);
   const across = dx * Math.cos(strip.heading) - dz * Math.sin(strip.heading);
   const onStrip = Math.abs(along) < strip.length / 2 && Math.abs(across) < strip.width;
-  if (onStrip && plane.onGround && plane.speed < 26 && plane.alive) return true;
+  if (onStrip && plane.onGround && plane.speed < 26 && plane.alive) {
+    hud.banner(plane.lastImpact < 5 ? 'GREASER — TEXTBOOK LANDING' : 'DOWN — THE FLOATS HELD');
+    return true;
+  }
   return false;
 }
 
@@ -149,11 +158,10 @@ function rules(dt) {
 
   const flakDamage = threat.update(dt, plane, mission.kind === 'survey' && course.index > 1);
   if (flakDamage > 0) {
-    plane.hull = Math.max(0, plane.hull - flakDamage);
+    damage.apply(flakDamage, 'The flak found the engine.');
     audio.thud(0.5);
     rig.kick(1.3);
-    hud.banner('FLAK — AIRFRAME HIT');
-    if (plane.hull <= 0) plane.crash('The flak found the engine.');
+    hud.banner(plane.hull < 30 ? 'FLAK — ENGINE SMOKING' : 'FLAK — AIRFRAME HIT');
   }
 
   if (!plane.alive) {
@@ -182,9 +190,12 @@ function frame() {
   if (state === 'flying' || state === 'over') {
     elapsed += dt;
     audio.update(plane.throttle, plane.speed);
+    plane.speedCap = damage?.power() ?? 1;
     if (state === 'flying') plane.update(dt, readInput());
     else plane.update(dt, inputIdle);
     rig.update(plane, dt, plane.speed / 140);
+    damage?.update(dt);
+    damage?.frame(dt);
     cockpit.visible = rig.mode === 'cockpit';
     plane.mesh.visible = rig.mode !== 'cockpit';
     traffic.update(time, dt);
@@ -204,6 +215,10 @@ function frame() {
     traffic.update(time, dt);
     animateSea(sea, time);
     rig.update(plane, dt, 0.5, true);
+    if (shotSmoke) {
+      damage?.update(dt * 2.4);
+      damage?.frame(dt * 0.22);
+    }
     cockpit.visible = rig.mode === 'cockpit';
     plane.mesh.visible = rig.mode !== 'cockpit';
     if (hud && time - lastHudPaint > 0.06) {
@@ -270,6 +285,10 @@ if (shot) {
   plane.setThrottle(pose.throttle);
   rig.mode = pose.camera;
   if (pose.gate) course.solo(pose.gate);
+  if (pose.hull) plane.hull = pose.hull;
+  shotSmoke = Boolean(pose.smoke);
+  for (const burst of pose.bursts ?? []) threat.place(burst.at, burst.size);
+  for (const puff of pose.trail ?? []) damage?.place(puff.at, puff.size);
   rig.update(plane, 0.016, 0.5, true);
   state = 'shot';
   hud.refresh(plane, course, 0, course.gates.length);
@@ -278,4 +297,5 @@ if (shot) {
   document.getElementById('hud').classList.add('hidden-hud');
 }
 
+window.__game = { get scene() { return scene; }, get camera() { return camera; }, get plane() { return plane; } };
 frame();

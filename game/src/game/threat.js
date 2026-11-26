@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { PLAY } from '../config.js';
 import { groundAt } from '../terrain/heightfield.js';
 
-const PUFF_MAT = new THREE.MeshStandardMaterial({ color: '#3b352f', roughness: 1, transparent: true, opacity: 0.85 });
+const PUFF_MAT = new THREE.MeshStandardMaterial({ color: '#7b7369', emissive: '#2d2822', emissiveIntensity: 0.6, roughness: 1, transparent: true, opacity: 0.9 });
 const PUFF_GEO = new THREE.SphereGeometry(1, 8, 6);
 
 export function createThreat(scene) {
@@ -47,6 +47,14 @@ export function createThreat(scene) {
       const distance = ahead.distanceTo(plane.position);
       if (distance < 46) return 6;
       return 0;
+    },
+    // Drop one burst at a world point (used by the screenshot poses).
+    place(position, scale = 3) {
+      const mesh = new THREE.Mesh(PUFF_GEO, PUFF_MAT.clone());
+      mesh.position.copy(position);
+      mesh.scale.setScalar(scale);
+      scene.add(mesh);
+      puffs.push({ mesh, life: 0, scale });
     },
     reset() {
       for (const puff of puffs) scene.remove(puff.mesh);

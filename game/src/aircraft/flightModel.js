@@ -80,7 +80,8 @@ export function createPlane(mesh, spawn) {
     const climb = forward.y;
 
     const flapDrag = plane.flaps > 0.5 ? FLIGHT.flapDrag : 0;
-    const target = THREE.MathUtils.lerp(FLIGHT.idle, FLIGHT.cruise, plane.throttle) * (1 - flapDrag * 0.42);
+    const load = plane.cargo ?? 1;
+    const target = THREE.MathUtils.lerp(FLIGHT.idle, FLIGHT.cruise * load, plane.throttle) * (plane.speedCap ?? 1) * (1 - flapDrag * 0.42);
     const accel = (target - plane.speed) * 0.55 - climb * FLIGHT.gravityBleed;
     plane.speed = Math.max(4, plane.speed + accel * dt);
 
