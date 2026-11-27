@@ -45,8 +45,8 @@ export const SHOTS = {
     const look = gate.position.clone().add(new THREE.Vector3(0, 34, 0)).addScaledVector(side, -96);
     // Hard banked on the turn, not level: the horizon goes diagonal and the airframe does
     // something, which is what the rival frames that beat this one all had.
-    const pose = aim(from, look, { roll: -0.42, pitch: 0.02 });
-    return { ...pose, speed: 88, throttle: 1, camera: 'chase', kind: 'courier', gate, zoom: 1.95, vapour: 1, rim: true };
+    const pose = aim(from, look, { roll: -0.3, pitch: 0.02 });
+    return { ...pose, speed: 88, throttle: 1, camera: 'chase', kind: 'courier', gate, zoom: 1.45, vapour: 1, rim: true };
   },
 
   // Final approach: the lamp, the numbers and the strip filling the windscreen.
