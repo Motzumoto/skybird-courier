@@ -32,7 +32,8 @@ const server = createServer(async (req, res) => {
 });
 
 const names = process.argv.slice(2);
-const shots = names.length ? names : ['cover', 'strait', 'approach', 'ridge'];
+const shots = names.length ? names : ['cover', 'strait', 'touchdown', 'ridge'];
+const HAND_IN = ['cover', 'strait', 'approach', 'ridge'];
 
 await mkdir(OUT, { recursive: true });
 await new Promise((resolve, reject) => { server.once('error', reject); server.listen(PORT, '127.0.0.1', resolve); });

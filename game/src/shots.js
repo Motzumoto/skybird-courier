@@ -43,8 +43,10 @@ export const SHOTS = {
     from.addScaledVector(new THREE.Vector3(normal.z, 0, -normal.x).normalize(), 38);
     const side = new THREE.Vector3(normal.z, 0, -normal.x).normalize();
     const look = gate.position.clone().add(new THREE.Vector3(0, 34, 0)).addScaledVector(side, -96);
-    const pose = aim(from, look, { roll: -0.1, pitch: 0.02 });
-    return { ...pose, speed: 79, throttle: 0.83, camera: 'chase', kind: 'courier', gate };
+    // Hard banked on the turn, not level: the horizon goes diagonal and the airframe does
+    // something, which is what the rival frames that beat this one all had.
+    const pose = aim(from, look, { roll: -0.42, pitch: 0.02 });
+    return { ...pose, speed: 88, throttle: 1, camera: 'chase', kind: 'courier', gate, zoom: 1.95, vapour: 1, rim: true };
   },
 
   // Final approach: the lamp, the numbers and the strip filling the windscreen.
@@ -78,7 +80,7 @@ export const SHOTS = {
     // the ridge stays brighter than the ash below it.
     const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(gate.ring.quaternion);
     const across = new THREE.Vector3(normal.z, 0, -normal.x).normalize();
-    const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 34, 0)).addScaledVector(across, -190), { roll: 0.18, pitch: -0.1 });
+    const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 34, 0)).addScaledVector(across, -45), { roll: 0.18, pitch: -0.04 });
     const bursts = [];
     const flashes = [];
     const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(pose.quaternion);
@@ -134,6 +136,47 @@ export const SHOTS = {
     look.y += gate ? 8 : 40;
     const pose = aim(pos, look, { roll: 0.09, pitch: -0.03 });
     return { ...pose, speed: 84, throttle: 0.95, camera: 'chase', kind: 'courier', gate, zoom: 1.55 };
+  },
+
+  // Lagoon touchdown: the floats bite the water into the sun. A floatplane landing is the one
+  // dramatic beat a courier game owns that a jet template does not, so it gets a frame.
+  touchdown: ({ strips }) => {
+    const strip = strips?.[0] ?? AIRSTRIPS[0];
+    const pad = airstripPad(strip);
+    // Sit off the approach end of the strip, over open water, nose into the sun so the spray is
+    // backlit and the glint path runs to the camera.
+    const heading = SUN_BEARING;
+    // Walk out from the runway towards the sun until there is real water to touch down on; the
+    // strip sits on a graded pad, so a fixed offset can still be over land.
+    let x = strip.x;
+    let z = strip.z;
+    let wet = false;
+    for (let out = 200; out <= 900; out += 40) {
+      x = strip.x + Math.sin(heading) * out;
+      z = strip.z + Math.cos(heading) * out;
+      if (groundAt(x, z) < -3) { wet = true; break; }
+    }
+    if (!wet) return { kind: 'medevac' };
+    // Floats on the water, not on the runway pad: the aircraft is touching down, so its origin
+    // sits a float-depth above the sea plane.
+    const from = new THREE.Vector3(x, 1.4, z);
+    // Look along the runway axis but tilted up into the sun, so the aircraft keeps the frame and
+    // the sun sits high in it rather than dead centre.
+    const to = from.clone().add(new THREE.Vector3(Math.sin(heading) * 90, 26, Math.cos(heading) * 90));
+    const pose = aim(from, to, { roll: 0.12, pitch: 0.06 });
+    return {
+      ...pose,
+      speed: 54,
+      throttle: 0.42,
+      camera: 'chase',
+      kind: 'medevac',
+      zoom: 1.4,
+      lift: 1.4,
+      // Water under the floats, spray behind them.
+      spray: { heading, strength: 0.95 },
+      vapour: 0.35,
+      rim: true,
+    };
   },
 
   // Windward cliffs: the courier on the coast run, sea and rock below the wing.

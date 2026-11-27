@@ -16,6 +16,7 @@ import { createMission } from './game/missions.js';
 import { buildTraffic } from './game/traffic.js';
 import { createThreat } from './game/threat.js';
 import { createSpray } from './render/spray.js';
+import { createVapor } from './render/vapor.js';
 import { createCargo } from './render/cargo.js';
 import { createDamage } from './aircraft/damage.js';
 import { createHud } from './ui/hud.js';
@@ -38,6 +39,7 @@ const sea = terrain.children.find((child) => child.userData?.wave);
 const traffic = buildTraffic(scene);
 const threat = createThreat(scene);
 const spray = createSpray(scene);
+const vapor = createVapor(scene);
 const cargo = createCargo(scene);
 let damage = null;
 const rig = createCameraRig(camera);
@@ -373,6 +375,28 @@ if (shot) {
   shotSmoke = Boolean(pose.smoke);
   for (const burst of pose.bursts ?? []) threat.place(burst.at, burst.size);
   for (const flash of pose.flashes ?? []) threat.flash(flash.at, flash.size);
+  // A water touchdown carries a spray wall; the still has to catch it standing up, so it is
+  // thrown here rather than left to the frame loop.
+  // A still can take a rim light the play view does not need: a point light just above and
+  // behind the lens lifts the hull off whatever it is flying over.
+  if (pose.rim) {
+    const rim = new THREE.PointLight('#ffe9c8', 60, 90, 2);
+    rim.position.copy(pose.position).add(new THREE.Vector3(0, 9, 0));
+    scene.add(rim);
+    rim.lookAt(plane.position);
+  }
+  // Stills need the ribbon already laid: run the vapour forward for a beat so the tips have a
+  // trail, rather than a single stub at the wingtip.
+  if (pose.vapour) {
+    vapor.clear();
+    for (let i = 0; i < 18; i++) vapor.update(1 / 60, plane, pose.vapour);
+  }
+  if (pose.spray) {
+    const pad = plane.position.clone();
+    pad.y = 0.6;
+    spray.sheet(pad, pose.spray.heading, pose.spray.strength);
+    for (let i = 0; i < 26; i++) spray.update(1 / 60);
+  }
   for (const puff of pose.trail ?? []) damage?.place(puff.at, puff.size);
   rig.update(plane, 0.016, 0.5, true);
   state = 'shot';
