@@ -81,6 +81,7 @@ export const SHOTS = {
     const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(gate.ring.quaternion);
     const across = new THREE.Vector3(normal.z, 0, -normal.x).normalize();
     const pose = aim(from, gate.position.clone().add(new THREE.Vector3(0, 34, 0)).addScaledVector(across, -45), { roll: 0.18, pitch: -0.04 });
+    // Chase, not glass: the caldera wants the airframe in it as well as the ash.
     const bursts = [];
     const flashes = [];
     const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(pose.quaternion);
@@ -106,7 +107,7 @@ export const SHOTS = {
       puff.y += 1.4 + i * 0.8;
       trail.push({ at: puff, size: 2.2 + i * 0.75 });
     }
-    return { ...pose, speed: 84, throttle: 0.95, camera: 'cockpit', kind: 'survey', gate, hull: 44, bursts, flashes, trail };
+    return { ...pose, speed: 84, throttle: 0.95, camera: 'chase', kind: 'survey', gate, hull: 44, bursts, flashes, trail, zoom: 1.9, vapour: 0.8, rim: true };
   },
 
   // The strait: over the span with a course gate hanging past it, so the landmark and the
