@@ -89,7 +89,7 @@ game/src/main.js         boot, loop, sortie rules
 game/src/input.js        keyboard state
 game/src/aircraft/       airframe mesh and the flight model
 game/src/terrain/        island heightfield and its meshes, airstrips, bridge, palms and hamlets
-game/src/render/         renderer, sky, sun, cameras, touchdown spray, cargo chutes
+game/src/render/         renderer, sky, sun, cameras, touchdown spray, wingtip vapour, cargo chutes
 game/src/game/           gates, missions, birds and boats, ridge flak
 game/src/ui/             instruments, minimap, title, pause and sortie report
 game/src/audio/          synthesised engine, wind, chime, impact
